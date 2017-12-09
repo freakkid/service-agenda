@@ -12,15 +12,17 @@ Resources related to a user in the API.
 
 ## User-Key [/v1/user/getkey{?username,password}]
 
+
 + Parameters
-    - username : `username`(string, required) - User Name
-    - password : `password`(required)
+    - username : `root` (string, required) - User Name
+    - password : `pass` (required)
 
 ### Get User Key [GET]
 
 get a security key for operations later
 
 + Response 200 (application/json) 
+
     
         {
             "key":"h12bhj53"
@@ -31,11 +33,6 @@ get a security key for operations later
 # Group Users
 
 Resources related to users in the API.
-
-## Users Collection [/v1/users{?key}]
-
-+ Parameters
-    - key : `h12bhj53`(string, required)
 
 ### List all Users [GET]
 
