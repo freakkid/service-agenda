@@ -31,10 +31,11 @@ get a security key for operations later
 
 Resources related to a users in the API.
 
-## Users Collection [/v1/users{?key}]
+## Users Collection [/v1/users{?key,limit}]
 
 + Parameters
     - key : `1e3576bt` (string, required)
+    - limit : 5 (string, required)
 
 ### List all Users [GET]
 
@@ -76,11 +77,8 @@ Resources related to a users in the API.
     + Body
 
             {
-                "id": 1,
-                "username":"zhang3",
-                "password":"zhang",
-                "phone":"12345678901",
-                "email":"zhang3@mail2.sysu.edu.cn",
+                "statue": true,
+                "message": "add user successful"
             }
 
 ### Get User by ID [GET /v1/users/{?id,key}]
