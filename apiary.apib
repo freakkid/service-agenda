@@ -13,6 +13,7 @@ Resource operations related to a user in the API.
 ## User-Key [/v1/user/getkey{?username,password}]
 
 + Parameters
+
     - username : `root` (string, required) - User Name
     - password : `pass` (required)
 
@@ -24,18 +25,19 @@ get a security key for operations later
 
         {
             "key":"1e3576bt",
-            "permissions":["user","admin"],
+            "status": true,
+            "message": "get key successfully"
         }
 
 # Group Users
 
-Resources related to a users in the API.
+Resources related to users in the API.
 
 ## Users Collection [/v1/users{?key,limit}]
 
 + Parameters
     - key : `1e3576bt` (string, required)
-    - limit : 5 (string, required)
+    - limit : 2 (int, required)
 
 ### List all Users [GET]
 
@@ -70,20 +72,21 @@ Resources related to a users in the API.
 
 + Response 201 (application/json)
 
-    + Headers
+    - Headers
 
             Location: /users/1
 
-    + Body
+    - Body
 
             {
-                "statue": true,
-                "message": "add user successful"
+                "status": true,
+                "message": "create user successfully"
             }
 
 ### Get User by ID [GET /v1/users/{?id,key}]
 
 + Parameters
+
     - id : `1` (int, required) - User Name
 
 + Response 200 (application/json)
@@ -95,3 +98,40 @@ Resources related to a users in the API.
             "phone":"12345678901",
             "email":"zhang3@mail2.sysu.edu.cn",
         }
+        
+# Group Meetings
+
+Resources related to meetings in the API.
+
+## Meetings Collection [/v1/meetings/create/{?key}]
+
++ Parameters
+
+    - key : `1e3576bt` (string, required)
+
+### Get User Key [POST]
+
+get a security key for operations later
+
++ Request (application/json)
+
+        {
+            "title":"emmmmmm",
+            "sponsor":"zhang3",
+            "participators":"user1 user2 user3",
+            "starttime":"YYYY-MM-DD HH:MM:SS",
+            "endtime":"YYYY-MM-DD HH:MM:SS"
+        }
+
++ Response 201 (application/json)
+
+    - Headers
+
+            Location: /meetings/emmmmmm
+
+    - Body
+
+            {
+                "status": true,
+                "message": "create meeting successfully"
+            }
