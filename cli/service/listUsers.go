@@ -14,7 +14,7 @@ func ListAllUsers () []RetJson {
 	if !ok {
 		fmt.Fprintln(os.Stderr, "Some mistakes happend in ListAllUsers")
 	}
-	resp, err := http.Get("https://private-633936-serviceagenda.apiary-mock.com/v1/users?key="+session)
+	resp, err := http.Get("https://polls.apiblueprint.org/v1/users?key="+session)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "error : some mistakes happend in sending get request to server")
 	}

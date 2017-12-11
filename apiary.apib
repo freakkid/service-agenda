@@ -24,7 +24,7 @@ get a security key for operations later
 
         {
             "key":"1e3576bt",
-            "permissions":["user","admin"]
+            "permissions":["user","admin"],
         }
 
 # Group Users
@@ -42,15 +42,17 @@ Resources related to a users in the API.
 
         [
             {
-                "id":1
-                "username":"zhang3"
-                "password":"zhang"
-                "email":"zhang3@mail2.sysu.edu.cn"
+                "id":1，
+                "username":"zhang3"，
+                "password":"zhang"，
+                "phone":"12345678902"，
+                "email":"zhang3@mail2.sysu.edu.cn"，
             },{
-                "id":2
-                "username":"li4"
-                "password":"li"
-                "email":"li4@mail2.sysu.edu.cn"
+                "id":2，
+                "username":"li4"，
+                "password":"li"，
+                "phone":"12345678901"，
+                "email":"li4@mail2.sysu.edu.cn"，
             }
         ]
 
@@ -59,9 +61,10 @@ Resources related to a users in the API.
 + Request (application/json)
 
         {
-            "username":"zhang3"
-            "password":"zhang"
-            "email":"zhang3@mail2.sysu.edu.cn"
+            "username":"zhang3",
+            "password":"zhang",
+            "phone":"12345678901",
+            "email":"zhang3@mail2.sysu.edu.cn",
         }
 
 + Response 201 (application/json)
@@ -73,13 +76,14 @@ Resources related to a users in the API.
     + Body
 
             {
-                "id": 1
-                "username":"zhang3"
-                "password":"zhang"
-                "email":"zhang3@mail2.sysu.edu.cn"
+                "id": 1,
+                "username":"zhang3",
+                "password":"zhang",
+                "phone":"12345678901",
+                "email":"zhang3@mail2.sysu.edu.cn",
             }
 
-### Get User by ID [GET /v1/users/{id}]
+### Get User by ID [GET /v1/users/{?id,key}]
 
 + Parameters
     - id : `1` (int, required) - User Name
@@ -87,8 +91,9 @@ Resources related to a users in the API.
 + Response 200 (application/json)
 
         {
-            "id" : 1
-            "username":"zhang3"
-            "password":"zhang"
-            "email":"zhang3@mail2.sysu.edu.cn"
+            "id" : 1,
+            "username":"zhang3",
+            "password":"zhang",
+            "phone":"12345678901",
+            "email":"zhang3@mail2.sysu.edu.cn",
         }

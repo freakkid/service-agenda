@@ -11,7 +11,7 @@ import (
 
 func CreateUser(createUsername string, createPassword string, createPhone string, createEmail string) error {
 	// regist user via http
-	resp, err := http.PostForm("http://private-633936-serviceagenda.apiary-mock.com/v1/users?key=1e3576bt", url.Values{"username":{createUsername}, "password":{createPassword}, "phone":{createPhone}, "email":{createEmail}})
+	resp, err := http.PostForm("http://polls.apiblueprint.org/v1/users?", url.Values{"username":{createUsername}, "password":{createPassword}, "phone":{createPhone}, "email":{createEmail}})
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

@@ -2,3 +2,4 @@
 *.out
 test
 ex-service-agenda.html
+*.db

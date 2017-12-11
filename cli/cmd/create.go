@@ -15,17 +15,13 @@
 package cmd
 
 import (
-	// "io/ioutil"
-	// "net/url"
 	"bufio"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
-	// "net/http"
-	// "encoding/json"
 	"github.com/spf13/cobra"
-	service "github.com/xiaxzh/service-agenda/service"
+	service "github.com/freakkid/service-agenda/cli/service"
 	log "github.com/txzdream/agenda-go/entity/tools"
 )
 
@@ -82,19 +78,6 @@ var mcreateCmd = &cobra.Command{
 	Short: "Create meeting",
 	Long:  `Use this command to create a new meeting.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// var Service service.Service
-		// service.StartAgenda(&Service)
-		// // check whether other user logged in
-		// ok, name := Service.AutoUserLogin()
-		// if ok == true {
-		// 	fmt.Println(strings.Join([]string{name, "@:"}, ""))
-		// }
-		// if !ok {
-		// 	fmt.Fprintln(os.Stderr, "error: No current logged user.")
-		// 	log.LogInfoOrErrorIntoFile("any", false, fmt.Sprintf("Create meeting with no user login."))
-		// 	os.Exit(0)
-		// }
-		
 		ok, name := service.GetCurrentUser()
 		if !ok {
 			fmt.Fprintln(os.Stderr, name)

@@ -14,7 +14,7 @@
 
 package main
 
-import "github.com/xiaxzh/service-agenda/cmd"
+import "github.com/freakkid/service-agenda/cli/cmd"
 
 func main() {
 	cmd.Execute()

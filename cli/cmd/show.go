@@ -15,15 +15,9 @@
 package cmd
 
 import (
-	// // "os"
 	"fmt"
-	// "strings"
-	// "net/http"
-	// "io/ioutil"
-	// "encoding/json"
-	service "github.com/xiaxzh/service-agenda/service"
+	service "github.com/freakkid/service-agenda/cli/service"
 	"github.com/spf13/cobra"
-	// log "github.com/txzdream/agenda-go/entity/tools"
 )
 
 // showCmd represents the show command
@@ -32,25 +26,6 @@ var ushowCmd = &cobra.Command{
 	Short: "Show user account",
 	Long: `Use this command to show every user's information.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// var Service service.Service
-		// service.StartAgenda(&Service)
-		// // check whether user login
-		// ok, CurUsername := Service.AutoUserLogin()
-		// if ok == true {
-		// 	fmt.Println(strings.Join([]string{CurUsername,"@:"}, ""))
-		// } else {
-		// 	fmt.Fprintln(os.Stderr, "error : No User has Logined in")
-		// 	os.Exit(1)
-		// }
-		// // get email and phone by username
-		// users := Service.ListAllUsers()
-		// fmt.Printf("%-15s%-25s%-25s\n", "Username", "E-mail", "phone number")
-		// for _, user := range users {
-		// 	fmt.Printf("%-15s%-25s%-25s\n", user.GetUserName(), user.GetEmail(), user.GetPhone())
-		// }
-		// fmt.Printf("\nTotal number is %d\n", len(users))
-
-		// os.Exit(0)	
 		var Item []service.RetJson
 		Item = service.ListAllUsers()
 		fmt.Printf("%-5s%-15s%-25s%-25s\n", "Id", "Username", "Phone number", "E-mail")

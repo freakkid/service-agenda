@@ -24,7 +24,7 @@ import (
 	// "net/http"
 	// "text/template"
 	"github.com/spf13/cobra"
-	service "github.com/xiaxzh/service-agenda/service"
+	service "github.com/freakkid/service-agenda/cli/service"
 )
 
 // loginCmd represents the login command
