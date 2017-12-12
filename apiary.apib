@@ -13,87 +13,244 @@ Resource operations related to a user in the API.
 ## User-Key [/v1/user/getkey{?username,password}]
 
 + Parameters
+
     - username : `root` (string, required) - User Name
-    - password : `pass` (required)
+    - password : `pass` (string, required)
 
 ### Get User Key [GET]
 
-get a security key for operations later
+get a security key for operations later;
+get user key successfully -- 200/OK;
+empty GET data -- 400/BadRequest;
+incorrect username or password -- 401/Unauthorized;
+if occurs error in sever -- 500/InternalServerError
 
 + Response 200 (application/json)
 
         {
             "key":"1e3576bt",
-            "permissions":["user","admin"],
+            "message": "get key successfully"
         }
+        
++ Response 400 (application/json)
+
+        {
+            "key":"",
+            "message": "empty username or password"
+        }
+        
++ Response 401 (application/json)
+
+        {
+            "key":"",
+            "message": "incorrect username or password"
+        }
+        
++ Response 500 (application/json)
+
+        {
+            "key":"",
+            "message": "server error"
+        }
+
 
 # Group Users
 
-Resources related to a users in the API.
+Resources related to users in the API.
 
-## Users Collection [/v1/users{?key}]
+## Users Collection [/v1/users{?key,limit}]
 
 + Parameters
     - key : `1e3576bt` (string, required)
+    - limit : 2 (int, required)
 
 ### List all Users [GET]
 
+get users info successfully -- 200/OK;
+invalid limit -- 400/BadRequest;
+invalid key -- 401/Unauthorized;
+if occurs error in sever -- 500/InternalServerError;
+if get empty limit, defalut set to 5
+
 + Response 200 (application/json)
 
-        [
-            {
-                "id":1，
-                "username":"zhang3"，
-                "password":"zhang"，
-                "phone":"12345678902"，
-                "email":"zhang3@mail2.sysu.edu.cn"，
-            },{
-                "id":2，
-                "username":"li4"，
-                "password":"li"，
-                "phone":"12345678901"，
-                "email":"li4@mail2.sysu.edu.cn"，
-            }
-        ]
+        {
+            "Message":"get userlist successfully",
+            "SingleUserInfoList":[
+                {
+                    "id":1,
+                    "username":"zhang3",
+                    "phone":"12345678902",
+                    "email":"zhang3@mail2.sysu.edu.cn"
+                },{
+                    "id":2,
+                    "username":"li4",
+                    "phone":"12345678901",
+                    "email":"li4@mail2.sysu.edu.cn"
+                }
+            ]
+        }
+
++ Response 400 (application/json)
+
+        {
+            "message": "invalid limit",
+            "SimgleUserInfoList":[]
+        }
+
++ Response 401 (application/json)
+
+        {
+            "message": "invalid key",
+            "SimgleUserInfoList":[]
+        }
+
++ Response 500 (application/json)
+
+        {
+            "message": "server error",
+            "SimgleUserInfoList":[]
+        }
+
 
 ### Create a New User [POST]
+
+create a user successfully -- 201/Created;
+empty input or duplicate username -- 400/BadRequest;
+if occurs error in sever -- 500/InternalServerError;
 
 + Request (application/json)
 
         {
             "username":"zhang3",
-            "password":"zhang",
+            "password":"seerfrgfg",
             "phone":"12345678901",
             "email":"zhang3@mail2.sysu.edu.cn",
         }
 
 + Response 201 (application/json)
 
-    + Headers
+    - Headers
 
             Location: /users/1
 
-    + Body
+    - Body
 
             {
-                "id": 1,
-                "username":"zhang3",
-                "password":"zhang",
-                "phone":"12345678901",
-                "email":"zhang3@mail2.sysu.edu.cn",
+                "status": true,
+                "message": "create user successfully"
             }
+            
++ Response 400 (application/json)
+
+        {
+            "message": "empty input or duplicate username",
+            "id" : -1,
+            "username":"",
+            "phone":"",
+            "email":""
+        }
+
++ Response 500 (application/json)
+
+        {
+            "message": "server error",
+            "id" : -1,
+            "username":"",
+            "phone":"",
+            "email":""
+        }
+        
 
 ### Get User by ID [GET /v1/users/{?id,key}]
 
+get users info successfully -- 200/OK;
+empty id or invalid id -- 400/BadRequest;
+invalid key -- 401/Unauthorized;
+user get by id not exist -- 404/NotFound;
+if occurs error in sever -- 500/InternalServerError
+
 + Parameters
+    - key : `1e3576bt` (string, required)
     - id : `1` (int, required) - User Name
 
 + Response 200 (application/json)
 
         {
+            "message": "get user info successfully",
             "id" : 1,
             "username":"zhang3",
-            "password":"zhang",
             "phone":"12345678901",
-            "email":"zhang3@mail2.sysu.edu.cn",
+            "email":"zhang3@mail2.sysu.edu.cn"
+        }
+
++ Response 400 (application/json)
+
+        {
+            "message": "invalid id",
+            "id" : -1,
+            "username":"",
+            "phone":"",
+            "email":""
+        }
+
++ Response 401 (application/json)
+
+        {
+            "message": "invalid key",
+            "id" : -1,
+            "username":"",
+            "phone":"",
+            "email":""
+        }
+        
++ Response 404 (application/json)
+
+        {
+            "message": "the user with id 1 not exists",
+            "id" : 1,
+            "username":"",
+            "phone":"",
+            "email":""
+        }
+        
++ Response 500 (application/json)
+
+        {
+            "message": "server error",
+            "id" : -1,
+            "username":"",
+            "phone":"",
+            "email":""
+        }
+
+### Delete a User [DELETE /v1/users/{?key,password}]
+
+delete user successfully and not return any message -- 204/NoContent;
+empty password  -- 400/BadRequest;
+invalid key or incorrect password -- 401/Unauthorized;
+if occurs error in sever -- 500/InternalServerError
+
++ Parameters
+    - key : `1e3576bt` (string, required)
+    - password : `pass` (string, required)
+
++ Response 204 
+
++ Response 400 (application/json)
+
+        {
+            "message": "empty password"
+        }
+
++ Response 401 (application/json)
+
+        {
+            "message": "invalid key or incorrect password"
+        }
+
++ Response 500 (application/json)
+
+        {
+            "message": "server error"
         }
