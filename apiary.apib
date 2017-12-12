@@ -19,10 +19,10 @@ Resource operations related to a user in the API.
 
 ### Get User Key [GET]
 
-get a security key for operations later
-get user key successfully -- 200/OK
-empty GET data -- 400/BadRequest
-incorrect username or password -- 401/Unauthorized
+get a security key for operations later;
+get user key successfully -- 200/OK;
+empty GET data -- 400/BadRequest;
+incorrect username or password -- 401/Unauthorized;
 if occurs error in sever -- 500/InternalServerError
 
 + Response 200 (application/json)
@@ -66,30 +66,30 @@ Resources related to users in the API.
 
 ### List all Users [GET]
 
-get users info successfully -- 200/OK
-invalid limit -- 400/BadRequest
-invalid key -- 401/Unauthorized
-if occurs error in sever -- 500/InternalServerError
+get users info successfully -- 200/OK;
+invalid limit -- 400/BadRequest;
+invalid key -- 401/Unauthorized;
+if occurs error in sever -- 500/InternalServerError;
 if get empty limit, defalut set to 5
 
 + Response 200 (application/json)
 
-        [
+        {
             "Message":"get userlist successfully",
-            "SimgleUserInfoList":[
+            "SingleUserInfoList":[
                 {
-                    "id":1，
-                    "username":"zhang3"，
-                    "phone":"12345678902"，
-                    "email":"zhang3@mail2.sysu.edu.cn"，
+                    "id":1,
+                    "username":"zhang3",
+                    "phone":"12345678902",
+                    "email":"zhang3@mail2.sysu.edu.cn"
                 },{
-                    "id":2，
-                    "username":"li4"，
-                    "phone":"12345678901"，
-                    "email":"li4@mail2.sysu.edu.cn"，
+                    "id":2,
+                    "username":"li4",
+                    "phone":"12345678901",
+                    "email":"li4@mail2.sysu.edu.cn"
                 }
             ]
-        ]
+        }
 
 + Response 400 (application/json)
 
@@ -115,6 +115,10 @@ if get empty limit, defalut set to 5
 
 ### Create a New User [POST]
 
+create a user successfully -- 201/Created;
+empty input or duplicate username -- 400/BadRequest;
+if occurs error in sever -- 500/InternalServerError;
+
 + Request (application/json)
 
         {
@@ -137,20 +141,33 @@ if get empty limit, defalut set to 5
                 "message": "create user successfully"
             }
             
-+ Response 401 (application/json)
++ Response 400 (application/json)
 
         {
-            "message": "incorrect username or password"
+            "message": "empty input or duplicate username",
+            "id" : -1,
+            "username":"",
+            "phone":"",
+            "email":""
         }
 
++ Response 500 (application/json)
 
+        {
+            "message": "server error",
+            "id" : -1,
+            "username":"",
+            "phone":"",
+            "email":""
+        }
+        
 
 ### Get User by ID [GET /v1/users/{?id,key}]
 
-get users info successfully -- 200/OK
-empty id or invalid id -- 400/BadRequest
-invalid key -- 401/Unauthorized
-user get by id not exist -- 404/NotFound
+get users info successfully -- 200/OK;
+empty id or invalid id -- 400/BadRequest;
+invalid key -- 401/Unauthorized;
+user get by id not exist -- 404/NotFound;
 if occurs error in sever -- 500/InternalServerError
 
 + Parameters
@@ -164,7 +181,7 @@ if occurs error in sever -- 500/InternalServerError
             "id" : 1,
             "username":"zhang3",
             "phone":"12345678901",
-            "email":"zhang3@mail2.sysu.edu.cn",
+            "email":"zhang3@mail2.sysu.edu.cn"
         }
 
 + Response 400 (application/json)
@@ -209,9 +226,9 @@ if occurs error in sever -- 500/InternalServerError
 
 ### Delete a User [DELETE /v1/users/{?key,password}]
 
-delete user successfully and not return any message -- 204/NoContent
-empty password  -- 400/BadRequest
-invalid key or incorrect password -- 401/Unauthorized
+delete user successfully and not return any message -- 204/NoContent;
+empty password  -- 400/BadRequest;
+invalid key or incorrect password -- 401/Unauthorized;
 if occurs error in sever -- 500/InternalServerError
 
 + Parameters
