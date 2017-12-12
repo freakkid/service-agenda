@@ -15,14 +15,9 @@
 package cmd
 
 import (
-	// "encoding/json"
-	// "io/ioutil"
 	"bufio"
 	"fmt"
 	"os"
-	// "strings"
-	// "net/http"
-	// "text/template"
 	"github.com/spf13/cobra"
 	service "github.com/freakkid/service-agenda/cli/service"
 )
