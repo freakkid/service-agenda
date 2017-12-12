@@ -13,8 +13,9 @@ Resource operations related to a user in the API.
 ## User-Key [/v1/user/getkey{?username,password}]
 
 + Parameters
+
     - username : `root` (string, required) - User Name
-    - password : `pass` (required)
+    - password : `pass` (string, required)
 
 ### Get User Key [GET]
 
@@ -24,17 +25,28 @@ get a security key for operations later
 
         {
             "key":"1e3576bt",
-            "permissions":["user","admin"],
+            "status": true,
+            "message": "get key successfully"
         }
+
++ Response 401 (application/json)
+
+        {
+            "key":"",
+            "status": false,
+            "message": "invalid username or password"
+        }
+
 
 # Group Users
 
-Resources related to a users in the API.
+Resources related to users in the API.
 
-## Users Collection [/v1/users{?key}]
+## Users Collection [/v1/users{?key,limit}]
 
 + Parameters
     - key : `1e3576bt` (string, required)
+    - limit : 2 (int, required)
 
 ### List all Users [GET]
 
@@ -44,17 +56,23 @@ Resources related to a users in the API.
             {
                 "id":1，
                 "username":"zhang3"，
-                "password":"zhang"，
                 "phone":"12345678902"，
                 "email":"zhang3@mail2.sysu.edu.cn"，
             },{
                 "id":2，
                 "username":"li4"，
-                "password":"li"，
                 "phone":"12345678901"，
                 "email":"li4@mail2.sysu.edu.cn"，
             }
         ]
+
++ Response 401 (application/json)
+
+        {
+            "status": false,
+            "message": "invalid key"
+        }
+
 
 ### Create a New User [POST]
 
@@ -69,23 +87,30 @@ Resources related to a users in the API.
 
 + Response 201 (application/json)
 
-    + Headers
+    - Headers
 
             Location: /users/1
 
-    + Body
+    - Body
 
             {
-                "id": 1,
-                "username":"zhang3",
-                "password":"zhang",
-                "phone":"12345678901",
-                "email":"zhang3@mail2.sysu.edu.cn",
+                "status": true,
+                "message": "create user successfully"
             }
+            
++ Response 401 (application/json)
+
+        {
+            "status": false,
+            "message": "invalid username or password"
+        }
+
+
 
 ### Get User by ID [GET /v1/users/{?id,key}]
 
 + Parameters
+    - key : `1e3576bt` (string, required)
     - id : `1` (int, required) - User Name
 
 + Response 200 (application/json)
@@ -97,3 +122,62 @@ Resources related to a users in the API.
             "phone":"12345678901",
             "email":"zhang3@mail2.sysu.edu.cn",
         }
+
++ Response 401 (application/json)
+
+        {
+            "status": false,
+            "message": "invalid key"
+        }
+
+
+### Delete a User [DELETE /v1/users/{?key,password}]
+
++ Parameters
+    - key : `1e3576bt` (string, required)
+    - password : `pass` (string, required)
+
++ Response 204 
+
++ Response 401 (application/json)
+
+        {
+            "status": false,
+            "message": "invalid key or password"
+        }
+
+
+# Group Meetings
+
+Resources related to meetings in the API.
+
+## Meetings Collection [/v1/meetings/create/{?key}]
+
++ Parameters
+
+    - key : `1e3576bt` (string, required)
+
+### Create a new meeting [POST]
+
++ Request (application/json)
+
+        {
+            "title":"emmmmmm",
+            "sponsor":"zhang3",
+            "participators":"user1 user2 user3",
+            "starttime":"YYYY-MM-DD HH:MM:SS",
+            "endtime":"YYYY-MM-DD HH:MM:SS"
+        }
+
++ Response 201 (application/json)
+
+    - Headers
+
+            Location: /meetings/emmmmmm
+
+    - Body
+
+            {
+                "status": true,
+                "message": "create meeting successfully"
+            }
