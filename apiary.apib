@@ -15,7 +15,7 @@ Resource operations related to a user in the API.
 + Parameters
 
     - username : `root` (string, required) - User Name
-    - password : `pass` (required)
+    - password : `pass` (string, required)
 
 ### Get User Key [GET]
 
@@ -98,10 +98,11 @@ Resources related to users in the API.
             "phone":"12345678901",
             "email":"zhang3@mail2.sysu.edu.cn",
         }
-### Delete a User [DELETE /v1/users/{?key}]
+### Delete a User [DELETE /v1/users/{?key,password}]
 
 + Parameters
     - key : `1e3576bt` (string, required)
+    - password : `pass` (string, required)
 
 + Response 200 (application/json)
 
