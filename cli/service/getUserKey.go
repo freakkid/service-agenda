@@ -47,7 +47,6 @@ func GetUserKey(username string, password string) bool {
 			if err != nil {
 				fmt.Fprintln(os.Stderr, "Some mistakes happend in write to session")
 				panic(err)
-				os.Exit(1)
 			}
 			// write to file -- current
 			if ioutil.WriteFile(UserFile, []byte(username), 0655) != nil {

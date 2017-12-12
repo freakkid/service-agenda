@@ -37,7 +37,7 @@ func DeleteUser(password string) (bool, error) {
 			return false, errors.New("Fail to read body.")
 		}
 		tmp := RetJson{}
-		if err := json.Unmarshal(body, tmp); err != nil {
+		if err := json.Unmarshal(body, &tmp); err != nil {
 			fmt.Fprintln(os.Stderr, "Can not resolve body.")
 			os.Exit(0)
 		}
