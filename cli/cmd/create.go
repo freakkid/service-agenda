@@ -18,11 +18,11 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"strconv"
-	"strings"
+	// "strconv"
+	// "strings"
 	"github.com/spf13/cobra"
 	service "github.com/freakkid/service-agenda/cli/service"
-	log "github.com/txzdream/agenda-go/entity/tools"
+	// log "github.com/txzdream/agenda-go/entity/tools"
 )
 
 // createCmd represents the create command
@@ -35,6 +35,7 @@ var ucreateCmd = &cobra.Command{
 		createUsername, _ := cmd.Flags().GetString("username")
 		createEmail, _ := cmd.Flags().GetString("email")
 		createPhone, _ := cmd.Flags().GetString("phone")
+		limit, _ := cmd.Flags().GetString("limit")
 		// check whether username, password, email or phone empty
 		if createUsername == "" || createEmail == "" ||
 			createPhone == "" {
@@ -65,91 +66,17 @@ var ucreateCmd = &cobra.Command{
 			prePassword = createPassword
 		}
 		
-		err := service.CreateUser(createUsername, createPassword, createPhone, createEmail)
-		if err != nil {
-			fmt.Println(err)
+		ok := service.CreateUser(createUsername, createPassword, createPhone, createEmail, limit)
+		if  !ok  {
+			fmt.Fprintln(os.Stderr, "error : Some errors occur in service.CreateUser")
+			os.Exit(1)
 		}
 		fmt.Println("Sucess : Register ", createUsername)
 	},
 }
 
-var mcreateCmd = &cobra.Command{
-	Use:   "create",
-	Short: "Create meeting",
-	Long:  `Use this command to create a new meeting.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		ok, name := service.GetCurrentUser()
-		if !ok {
-			fmt.Fprintln(os.Stderr, name)
-		}
-		if meetingName == "" {
-			fmt.Fprintln(os.Stderr, "error: Meeting name is required.")
-			log.LogInfoOrErrorIntoFile(name, false, fmt.Sprintf("create meeting %s.", meetingName))
-			os.Exit(0)
-		}
-		var begin, end string
-		var participator []string
-
-		// show all users
-		userList := service.ListAllUsers()
-		var self int
-		for i, v := range userList {
-			if v.Username == name {
-				self = i
-			}
-			fmt.Printf("%d. %s\n", i+1, v.Username)
-		}
-
-		fmt.Printf("Please choose the number of them to join your meeting(seprate with space): ")
-		var chosenUsers string
-		reader := bufio.NewReader(os.Stdin)
-		data, _, _ := reader.ReadLine()
-		chosenUsers = string(data)
-		chosenList := strings.Split(chosenUsers, " ")
-
-		for _, v := range chosenList {
-			if len(v) == 0 {
-				continue
-			}
-			i, err := strconv.Atoi(v)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, "error: Invalid input.")
-				log.LogInfoOrErrorIntoFile(name, false, fmt.Sprintf("Can not recognize %s when creating meeting.", v))
-				os.Exit(0)
-			}
-			if i <= 0 || i > len(userList) {
-				fmt.Fprintln(os.Stderr, "error: Invalid input.")
-				os.Exit(0)
-			}
-			if i == self+1 {
-				fmt.Println("error: You can not add yourself to the meeting.")
-				os.Exit(0)
-			}
-			participator = append(participator, userList[i-1].Username)
-		}
-
-		// scan start time and end time
-		fmt.Printf("Please input start time(format: YYYY-MM-DD/HH:MM): ")
-		data, _, _ = reader.ReadLine()
-		begin = string(data)
-		fmt.Printf("Please input end time(format: YYYY-MM-DD/HH:MM): ")
-		data, _, _ = reader.ReadLine()
-		end = string(data)
-
-		ok = service.CreateMeeting(name, meetingName, begin, end, participator)
-		if ok {
-			fmt.Printf("Create meeting %s finished.\n", meetingName)
-			log.LogInfoOrErrorIntoFile(name, true, fmt.Sprintf("Finish creating meeting %s\n.", meetingName))
-		} else {
-			fmt.Printf("Can not create meeting %s.\n", meetingName)
-			log.LogInfoOrErrorIntoFile(name, false, fmt.Sprintf("Fail to create meeting %s.\n", meetingName))
-		}
-	},
-}
-
 func init() {
 	userCmd.AddCommand(ucreateCmd)
-	meetingCmd.AddCommand(mcreateCmd)
 
 	// Here you will define your flags and configuration settings.
 
@@ -160,9 +87,9 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// createCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	mcreateCmd.Flags().StringVarP(&meetingName, "name", "", "", "Name for meeting you want to create.")
 
 	// xiaxzh's part:
+	ucreateCmd.Flags().StringP("limit", "l", "2", "limit of result")
 	ucreateCmd.Flags().StringP("username", "u", "", "Create Username")
 	ucreateCmd.Flags().StringP("email", "e", "", "Create Email")
 	ucreateCmd.Flags().StringP("phone", "p", "", "Create Phone")
