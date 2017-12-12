@@ -87,7 +87,6 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// createCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-
 	// xiaxzh's part:
 	ucreateCmd.Flags().StringP("limit", "l", "2", "limit of result")
 	ucreateCmd.Flags().StringP("username", "u", "", "Create Username")
