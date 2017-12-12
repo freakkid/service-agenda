@@ -29,6 +29,15 @@ get a security key for operations later
             "message": "get key successfully"
         }
 
++ Response 401 (application/json)
+
+        {
+            "key":"",
+            "status": false,
+            "message": "invalid username or password"
+        }
+
+
 # Group Users
 
 Resources related to users in the API.
@@ -47,17 +56,23 @@ Resources related to users in the API.
             {
                 "id":1，
                 "username":"zhang3"，
-                "password":"zhang"，
                 "phone":"12345678902"，
                 "email":"zhang3@mail2.sysu.edu.cn"，
             },{
                 "id":2，
                 "username":"li4"，
-                "password":"li"，
                 "phone":"12345678901"，
                 "email":"li4@mail2.sysu.edu.cn"，
             }
         ]
+
++ Response 401 (application/json)
+
+        {
+            "status": false,
+            "message": "invalid key"
+        }
+
 
 ### Create a New User [POST]
 
@@ -82,6 +97,15 @@ Resources related to users in the API.
                 "status": true,
                 "message": "create user successfully"
             }
+            
++ Response 401 (application/json)
+
+        {
+            "status": false,
+            "message": "invalid username or password"
+        }
+
+
 
 ### Get User by ID [GET /v1/users/{?id,key}]
 
@@ -98,17 +122,28 @@ Resources related to users in the API.
             "phone":"12345678901",
             "email":"zhang3@mail2.sysu.edu.cn",
         }
+
++ Response 401 (application/json)
+
+        {
+            "status": false,
+            "message": "invalid key"
+        }
+
+
 ### Delete a User [DELETE /v1/users/{?key,password}]
 
 + Parameters
     - key : `1e3576bt` (string, required)
     - password : `pass` (string, required)
 
-+ Response 204 (application/json)
++ Response 204 
+
++ Response 401 (application/json)
 
         {
-            "status": true,
-            "message": "delete successfully"
+            "status": false,
+            "message": "invalid key or password"
         }
 
 
