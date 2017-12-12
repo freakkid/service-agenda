@@ -24,15 +24,17 @@ type User struct {
 }
 
 
-func FindUser(id string) RetJson {
+func FindUser(id string) (bool, RetJson) {
 	ok, session := GetCurrentUser()
 	if !ok {
 		fmt.Fprintln(os.Stderr, "Some mistakes happend in FindUser")
+		return false, RetJson{}
 	}
 	tarUrl := "http://private-633936-serviceagenda.apiary-mock.com/v1/users/?key="+session+"&id="+id
 	resp, err := http.Get(tarUrl)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "error : Some mistakes happend in sending get request to tarUrl")
+
 	}
 
 	defer resp.Body.Close()
@@ -52,7 +54,7 @@ func FindUser(id string) RetJson {
 		if err := json.Unmarshal(body, &temp); err != nil {
 			fmt.Fprintln(os.Stderr, "error : Some mistakes happend in parsing body")
 		}
-		return RetJson{temp.Id, temp.Username, temp.Phone, temp.Email}
+		return true, RetJson{temp.Id, temp.Username, temp.Phone, temp.Email}
 	}  else {
 		temp := struct {
 			Message		string
@@ -65,6 +67,6 @@ func FindUser(id string) RetJson {
 			fmt.Fprintln(os.Stderr, "error : Some mistakes happend in parsing body")
 		}
 		fmt.Fprintln(os.Stderr, temp.Message)
-		return RetJson{}
+		return false, RetJson{}
 	}
 }
