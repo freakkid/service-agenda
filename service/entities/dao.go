@@ -11,24 +11,49 @@ type agendaDao struct {
 //
 
 // create user into database
-func (dao *agendaDao) createUser(user *User) error {
+func (dao *agendaDao) createUser(user *User) (*User, error) {
 	_, err := dao.Insert(user)
-	return err
+	if err != nil {
+		return nil, err
+	}
+	_, err = dao.Get(user)
+	return user, nil
 }
 
-func (dao *agendaDao) findUserByUID(id int) (*User, error) {
+func (dao *agendaDao) updateUserKey(user *User, selectedUser *User) (int64, error) {
+	return dao.Update(user, selectedUser)
+}
+
+func (dao *agendaDao) findUserByConditions(user *User) (*User, error) {
+	_, err := dao.Get(user)
+	return user, err
+}
+
+func (dao *agendaDao) findUserByUsername(username string) (*User, error) {
+	var user = &User{UserName: username}
+	_, err := dao.Get(user)
+	return user, err
+}
+
+func (dao *agendaDao) findUserByKey(key string) (*User, error) {
+	var user = &User{Key: key}
+	_, err := dao.Get(user)
+	return user, err
+}
+
+func (dao *agendaDao) findUserByID(id int) (*User, error) {
 	var user = &User{ID: id}
+	_, err := dao.Get(user)
+	return user, err
+}
+func (dao *agendaDao) findUserByKeyAndID(key string, id int) (*User, error) {
+	var user = &User{Key: key, ID: id}
 	_, err := dao.Get(user)
 	return user, err
 }
 
 // get a user by user name and password
-func (dao *agendaDao) findUserByUsernamePassword(username string, password string) (*User, error) {
-	var user = &User{UserName: username, Password: password}
-	_, err := dao.Get(user)
-	return user, err
-}
-func (dao *agendaDao) UpdateKeyByUsernamePassword(username string, password string, key string) (*User, error) {
+func (dao *agendaDao) findUserByUsernameAndPassword(username string, password string) (*User, error) {
 	var user = &User{UserName: username, Password: password}
 	_, err := dao.Get(user)
 	return user, err
@@ -37,7 +62,7 @@ func (dao *agendaDao) UpdateKeyByUsernamePassword(username string, password stri
 // get all users info
 func (dao *agendaDao) getLimitUsers(limitNumber int) ([]User, error) {
 	if limitNumber <= 0 {
-		limitNumber = 20
+		limitNumber = 5
 	}
 	var userList = make([]User, 0, 0)
 	err := dao.Limit(limitNumber).Find(&userList)
@@ -49,9 +74,9 @@ func (dao *agendaDao) countAllUsers() (int64, error) {
 	return dao.Count(new(User))
 }
 
-// delete user by id
-func (dao *agendaDao) deleteUserByID(id int) (int64, error) {
-	return dao.Delete(&User{ID: id})
+// delete user by key and password
+func (dao *agendaDao) deleteUserByKeyAndPassword(key string, password string) (int64, error) {
+	return dao.Delete(&User{Key: key, Password: password})
 }
 
 //

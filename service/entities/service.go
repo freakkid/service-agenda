@@ -1,322 +1,222 @@
 package entities
 
 import (
-	"agenda-go/entity/model"
+	"net/http"
+	"strconv"
 
 	"github.com/freakkid/service-agenda/service/tools"
 )
 
+// AgendaAtomicService -- a struct to operate service function
 type AgendaAtomicService struct{}
 
+// AgendaService -- an instance
 var AgendaService = AgendaAtomicService{}
 
-func (*AgendaAtomicService) CreateUser(user *User) error {
+// GetUserKeyResponse -- GetUserKey
+type GetUserKeyResponse struct {
+	Key     string
+	Message string
+}
+
+// UserKeyResponse -- GetUserByKeyAndID
+type UserKeyResponse struct {
+	Message  string
+	ID       int
+	UserName string
+	Email    string
+	Phone    string
+}
+
+// DeleteUserResponse -- DeleteUserByKeyAndPassword
+type DeleteUserResponse struct {
+	Message string
+}
+
+// used in UsersInfoResponse
+type singleUserInfo struct {
+	ID       int
+	UserName string
+	Email    string
+	Phone    string
+}
+
+// UsersInfoResponse -- ListUsersByKeyAndLimit
+type UsersInfoResponse struct {
+	Message            string
+	SimgleUserInfoList []singleUserInfo
+}
+
+// CreateUserResponse -- CreateUser
+type CreateUserResponse struct {
+	Message  string
+	ID       int
+	UserName string
+	Email    string
+	Phone    string
+}
+
+// CreateUser -- check if input is empty and username is duplicate
+func (*AgendaAtomicService) CreateUser(
+	username string, password string, email string, phone string) (int, CreateUserResponse) {
+	// ---- check input ----
+	if username == "" || password == "" || email == "" || phone == "" {
+		return http.StatusBadRequest, CreateUserResponse{Message: "empty input", ID: -1}
+	}
 	dao := agendaDao{xormEngine}
-	return dao.Save(user)
+	// ---- check username ----
+	user, err := dao.findUserByUsername(username)
+	if err != nil {
+		return http.StatusInternalServerError, CreateUserResponse{Message: "server error", ID: -1}
+	}
+	if user != nil {
+		return http.StatusBadRequest, CreateUserResponse{Message: "duplicate username", ID: -1}
+	}
+	// ---- create user ----
+	user, err = dao.createUser(&User{UserName: username, Password: password, Email: email, Phone: phone})
+	if err != nil || user == nil {
+		return http.StatusInternalServerError, CreateUserResponse{Message: "server error", ID: -1}
+	}
+	// ---- create user successfully ----
+	return http.StatusCreated, CreateUserResponse{"create user" + username + "successfully",
+		user.ID, user.UserName, user.Email, user.Phone}
 }
 
-func (*AgendaAtomicService) GetUserKey(user *User) (string, error) {
+// GetUserKey --- check if user exists and generate key
+// if user no exists or occur error, return empty string and error
+// if get key success, return key and empty error
+func (*AgendaAtomicService) GetUserKey(username string, password string) (int, GetUserKeyResponse) {
+	// ---- check GET data ----
+	if username == "" || password == "" { // check if empty username and password
+		return http.StatusBadRequest, GetUserKeyResponse{"", "empty username and password"}
+	}
 	dao := agendaDao{xormEngine}
-	var key = tools.GetKey()
-	return dao.Save(user)
-}
-
-// 没有可自动登陆的用户，需要用户输入用户名和密码登陆
-func (service *Service) UserLogin(userName string, password string) bool {
-	// 对传入的md5密码进行加密
-	password = tools.MD5Encryption(password)
-	// 根据获得的用户名和密码判断是否存在该用户名
-	if len(service.AgendaStorage.QueryUsers(func(user model.User) bool {
-		return user.GetUserName() == userName && user.GetPassword() == password
-	})) != 1 {
-		return false
+	user, err := dao.findUserByUsernameAndPassword(username, tools.MD5Encryption(password))
+	if err != nil { // server error
+		return http.StatusInternalServerError, GetUserKeyResponse{"", err.Error()}
 	}
-	// 将当前用户名写入curUser.txt
-	return service.AgendaStorage.WriteToCurrentUserFile(userName)
-}
-
-// 用户退出登录，把空字符串写进curuser.txt
-func (service *Service) UserLogout() bool {
-	return service.AgendaStorage.WriteToCurrentUserFile("")
-}
-
-// 用户注册，用户输入信息，判断是否存在同名用户
-func (service *Service) UserRegister(userName string, password string,
-	email string, phone string) bool {
-	// 根据获得的用户名判断是否存在该用户名
-	if len(service.AgendaStorage.QueryUsers(func(user model.User) bool {
-		return user.GetUserName() == userName
-	})) == 1 {
-		return false // 已存在同名用户则注册失败
+	if user == nil { // user not exist
+		return http.StatusUnauthorized, GetUserKeyResponse{"", "incorrect username or password"}
 	}
-	// 对传入的md5密码进行加密
-	password = tools.MD5Encryption(password)
-	return service.AgendaStorage.CreateUser(
-		model.User{UserName: userName, Password: password, Email: email, Phone: phone})
-}
-
-// 删除用户，判断是否存在同名用户再进行删除
-func (service *Service) DeleteUser(userName string, password string) bool {
-	password = tools.MD5Encryption(password)
-	// 存在同名用户则进行删除操作
-	if !service.AgendaStorage.DeleteUser(func(user model.User) bool {
-		return user.GetUserName() == userName && user.GetPassword() == password
-	}) {
-		return false
+	// ---- get new key ----
+	user.Key = tools.GetKey() // generate new key
+	affected, err := dao.updateUserKey(user, &User{UserName: username, Password: password})
+	if affected == 0 { // user not exist
+		return http.StatusUnauthorized, GetUserKeyResponse{"", "incorrect username or password"}
 	}
-	// 删除所有发起会议
-	service.DeleteAllMeetings(userName)
-	// 退出所有参与会议并删除参与人数为0的会议
-	meetings := service.ListAllParticipateMeetings(userName)
-	for _, meeting := range meetings {
-		service.QuitMeeting(userName, meeting.GetTitle())
+	if err != nil { // server error
+		return http.StatusInternalServerError, GetUserKeyResponse{"", err.Error()}
 	}
-	return true
+	return http.StatusOK, GetUserKeyResponse{user.Key, "get user key successfully"}
 }
 
-// 获取当前用户
-func (service *Service) GetCurrentUser(currentUserName string) (bool, model.User) {
-	users := service.AgendaStorage.QueryUsers(func(user model.User) bool {
-		return user.GetUserName() == currentUserName
-	})
-	if len(users) != 1 {
-		return false, model.User{}
+// GetUserByKeyAndID --- convert string id to int id, if occur error return empty user and error
+// check if key is valid and id exsits and belong to the same user
+// if valid key and exist id, return User struct
+func (*AgendaAtomicService) GetUserByKeyAndID(key string, stringID string) (int, UserKeyResponse) {
+	var (
+		id   int
+		err  error
+		user *User
+	)
+	dao := agendaDao{xormEngine}
+	// ---- check key ----
+	user, err = dao.findUserByKey(key)
+	if err != nil { // server error
+		return http.StatusInternalServerError, UserKeyResponse{Message: "server error", ID: -1}
 	}
-	return true, users[0]
-}
-
-// 列出所有用户
-func (service *Service) ListAllUsers() []model.User {
-	return service.AgendaStorage.QueryUsers(func(user model.User) bool {
-		return true
-	})
-}
-
-// 判断会议起始时间是否合法
-func IsValidStartAndEndDateTime(startDateString *string, endDateString *string) bool {
-	// 判断时间字符串是否符合格式要求：2012-2-2/11:23并解析字符串为Int数组
-	var startDateIntArray [5]int
-	var endDateIntArray [5]int
-	if !model.StringDateTimeToIntArray(*startDateString, &startDateIntArray) ||
-		!model.StringDateTimeToIntArray(*endDateString, &endDateIntArray) {
-		return false
+	if user == nil { // invalid key
+		return http.StatusUnauthorized, UserKeyResponse{Message: "invalid key", ID: -1}
 	}
-
-	// 判断时间数字是否合法
-	if !model.IsValidDateTime(startDateIntArray) || !model.IsValidDateTime(endDateIntArray) {
-		return false
+	// ---- check id ----
+	if stringID == "" { // empty id
+		return http.StatusBadRequest, UserKeyResponse{Message: "empty id", ID: -1}
 	}
-
-	// 判断开始时间是否小于结束时间
-	startDate := model.Date{DateTime: model.SetDateByYMDHM(startDateIntArray)}
-	endDate := model.Date{DateTime: model.SetDateByYMDHM(endDateIntArray)}
-	if !startDate.Before(endDate) {
-		return false
+	id, err = strconv.Atoi(stringID)
+	if err != nil || id <= 0 { // invalid id
+		return http.StatusBadRequest, UserKeyResponse{Message: "invalid id", ID: -1}
 	}
-
-	// 再一次由于对原有字符串有容错性，再次转换确保字符串格式规范
-	*startDateString = startDate.ToString()
-	*endDateString = endDate.ToString()
-	return true
-}
-
-// 判断单个用户是否已注册
-func (service *Service) IsRegisteredUser(userName string) bool {
-	return len(service.AgendaStorage.QueryUsers(func(user model.User) bool {
-		return user.GetUserName() == userName
-	})) == 1
-}
-
-// 判断多个用户是否都已注册
-func (service *Service) IsRegisteredUsers(userNames []string) bool {
-	return len(service.AgendaStorage.QueryUsers(func(user model.User) bool {
-		for _, userName := range userNames {
-			if userName == user.GetUserName() {
-				return true
-			}
-		}
-		return false
-	})) == len(userNames) // 判断人数是否一致
-}
-
-// 获取时间冲突会议
-func (service *Service) GetTimeConflictMeetings(startDateString string, endDateString string) []model.Meeting {
-	return service.AgendaStorage.QueryMeetings(func(meeting model.Meeting) bool {
-		return (meeting.GetStartDate() <= startDateString && meeting.GetEndDate() > startDateString) ||
-			(meeting.GetStartDate() < endDateString && meeting.GetEndDate() >= endDateString) ||
-			(meeting.GetStartDate() >= startDateString && meeting.GetEndDate() <= endDateString)
-	})
-}
-
-// 创建会议 - 检查title是否唯一、时间是否合法、参与者和发起者是否可参加会议椅
-func (service *Service) CreateMeeting(sponsor string, title string,
-	startDateString string, endDateString string, participators []string) bool {
-	// 判断title是否已存在 / 判断时间合法 / 判断发起者和参与者是否都已注册
-	if len(service.AgendaStorage.QueryMeetings(func(meeting model.Meeting) bool {
-		return meeting.GetTitle() == title
-	})) > 0 || !IsValidStartAndEndDateTime(&startDateString, &endDateString) ||
-		!service.IsRegisteredUser(sponsor) || !service.IsRegisteredUsers(participators) {
-		return false
+	// ---- find user by id ----
+	user, err = dao.findUserByID(id)
+	if err != nil { // server error
+		return http.StatusInternalServerError, UserKeyResponse{Message: "server error", ID: -1}
 	}
+	if user == nil { // user not exist
+		return http.StatusNotFound,
+			UserKeyResponse{Message: "the user with id " + stringID + "not exists", ID: id}
+	}
+	return http.StatusOK,
+		UserKeyResponse{"get user info successfully", user.ID, user.UserName, user.Email, user.Phone}
+}
 
-	// 检查参与者是否与发起者是同一人
-	for _, participator := range participators {
-		if sponsor == participator {
-			return false
+// DeleteUserByKeyAndPassword --- check key if valid
+// check if password correct
+func (*AgendaAtomicService) DeleteUserByKeyAndPassword(key string, password string) (int, DeleteUserResponse) {
+	var (
+		err      error
+		user     *User
+		affected int64
+	)
+	dao := agendaDao{xormEngine}
+	// ---- check key ----
+	user, err = dao.findUserByKey(key)
+	if err != nil { // server error
+		return http.StatusInternalServerError, DeleteUserResponse{Message: "server error"}
+	}
+	if user == nil { // invalid key
+		return http.StatusUnauthorized, DeleteUserResponse{Message: "invalid key"}
+	}
+	// ---- check password ----
+	if password == "" { // empty input
+		return http.StatusBadRequest, DeleteUserResponse{"empty password"}
+	}
+	affected, err = dao.deleteUserByKeyAndPassword(key, tools.MD5Encryption(password))
+	if err != nil { // server error
+		return http.StatusInternalServerError, DeleteUserResponse{Message: "server error"}
+	}
+	if affected == 0 { // delete user fail
+		return http.StatusUnauthorized, DeleteUserResponse{Message: "incorrect paassword"}
+	}
+	// delete successfully
+	return http.StatusNoContent, DeleteUserResponse{}
+}
+
+// ListUsersByKeyAndLimit --- check key is valid or not
+// if limit is invalid, default set to 10
+func (*AgendaAtomicService) ListUsersByKeyAndLimit(key string, stringLimit string) (int, UsersInfoResponse) {
+	var (
+		limit int
+		err   error
+		user  *User
+		users []User
+	)
+	dao := agendaDao{xormEngine}
+	// ---- check key ----
+	user, err = dao.findUserByKey(key)
+	if err != nil { // server error
+		return http.StatusInternalServerError, UsersInfoResponse{Message: "server error"}
+	}
+	if user == nil { // invalid key
+		return http.StatusUnauthorized, UsersInfoResponse{Message: "invalid key"}
+	}
+	// ---- check limit ----
+	if stringLimit == "" {
+		limit = 5
+	} else {
+		limit, err = strconv.Atoi(stringLimit)
+		if err != nil || limit <= 0 { // invalid limit
+			return http.StatusBadRequest, UsersInfoResponse{Message: "invalid limit"}
 		}
 	}
-
-	// 获取同时段冲突会议
-	timeConflictMeetings := service.GetTimeConflictMeetings(startDateString, endDateString)
-
-	// 判断发起者或参与者是否参与了冲突会议
-	for _, tMeeting := range timeConflictMeetings {
-		if tMeeting.IsParticipators(sponsor) || tMeeting.GetSponsor() == sponsor { // 检查发起者
-			return false
-		}
-		for _, participator := range participators { // 检查参与者
-			if tMeeting.IsParticipators(participator) || tMeeting.GetSponsor() == participator {
-				return false
-			}
-		}
+	// ---- get limit users ----
+	users, err = dao.getLimitUsers(limit)
+	if err != nil { // server error
+		return http.StatusInternalServerError, UsersInfoResponse{Message: "server error"}
 	}
-
-	// 创建会议
-	return service.AgendaStorage.CreateMeeting(
-		model.Meeting{Title: title, Sponsor: sponsor, Participators: participators, StartDate: startDateString, EndDate: endDateString})
-}
-
-// 发起者增加会议参与者 -- 判断参与者是否可参加
-func (service *Service) AddParticipatorByTitle(sponsor string, title string, participator string) bool {
-	meetings := service.AgendaStorage.QueryMeetings(func(meeting model.Meeting) bool {
-		return meeting.GetTitle() == title && meeting.GetSponsor() == sponsor
-	})
-	// 判断该会议是否存在 / 判断参与者是否已注册 / 参与者就是发起者本人
-	if len(meetings) == 0 || !service.IsRegisteredUser(participator) || participator == sponsor {
-		return false
+	simgleUserInfoList := make([]singleUserInfo, 0, 0)
+	for _, userInfo := range users {
+		simgleUserInfoList = append(simgleUserInfoList,
+			singleUserInfo{userInfo.ID, userInfo.UserName, userInfo.Email, userInfo.Phone})
 	}
-
-	meeting := meetings[0] // 获取该会议
-	// 获取同时段冲突会议
-	timeConflictMeetings := service.GetTimeConflictMeetings(meeting.GetStartDate(), meeting.GetEndDate())
-	// 判断参与者是否参与了冲突会议
-	for _, tMeeting := range timeConflictMeetings {
-		if tMeeting.IsParticipators(participator) || tMeeting.GetSponsor() == participator {
-			return false
-		}
-	}
-
-	// 增加参与者
-	if !meeting.AddParticipator(participator) {
-		return false
-	}
-
-	// 更新会议内容
-	return service.AgendaStorage.UpdateMeeting(func(pMeeting model.Meeting) bool {
-		return pMeeting.GetTitle() == meeting.GetTitle()
-	}, meeting)
-}
-
-// 发起者删除会议参与者 -- 判断删除该参与者是否成功，删除后会议人数是否为0
-func (service *Service) DeleteParticipatorByTitle(sponsor string, title string, participator string) bool {
-	meetings := service.AgendaStorage.QueryMeetings(func(meeting model.Meeting) bool {
-		return meeting.GetTitle() == title && meeting.GetSponsor() == sponsor
-	})
-
-	// 判断该会议是否存在 / 删除该参与者是否成功
-	if len(meetings) == 0 || !meetings[0].DeleteParticipator(participator) {
-		return false
-	}
-
-	// 判断成功删除后会议参与者人数
-	if meetings[0].GetParticipatorsNumber() > 0 { // 还有参与者，更新会议
-		return service.AgendaStorage.UpdateMeeting(func(meeting model.Meeting) bool {
-			return meeting.GetTitle() == meetings[0].GetTitle()
-		}, meetings[0])
-	} else { // 没有参与者，删除会议
-		return service.AgendaStorage.DeleteMeetings(func(meeting model.Meeting) bool {
-			return meeting.GetTitle() == meetings[0].GetTitle()
-		})
-	}
-}
-
-// 查询会议---通过用户名(用户作为发起者/参与者)和会议title查找
-func (service *Service) MeetingQueryByTitle(userName string, title string) []model.Meeting {
-	return service.AgendaStorage.QueryMeetings(func(meeting model.Meeting) bool {
-		return meeting.GetTitle() == title && (meeting.GetSponsor() == userName ||
-			meeting.IsParticipators(userName))
-	})
-}
-
-// 查询会议---通过usernsme(作为会议发起者和参与者)和会议起始时间查找
-func (service *Service) MeetingQueryByUserAndTime(
-	userName string, startDateString string, endDateString string) []model.Meeting {
-
-	// 检查字符串是否合法
-	if !IsValidStartAndEndDateTime(&startDateString, &endDateString) {
-		return []model.Meeting{}
-	}
-	// 获取用户发起/参与且时间冲突的会议
-	return service.AgendaStorage.QueryMeetings(func(meeting model.Meeting) bool {
-		return (meeting.GetSponsor() == userName || meeting.IsParticipators(userName)) &&
-			((meeting.GetStartDate() <= startDateString && meeting.GetEndDate() >= startDateString) ||
-				(meeting.GetStartDate() <= endDateString && meeting.GetEndDate() >= endDateString) ||
-				(meeting.GetStartDate() >= startDateString && meeting.GetEndDate() <= endDateString))
-	})
-}
-
-// 列出该用户发起或参与的所有会议
-func (service *Service) ListAllMeetings(userName string) []model.Meeting {
-	return service.AgendaStorage.QueryMeetings(func(meeting model.Meeting) bool {
-		return meeting.GetSponsor() == userName && meeting.IsParticipators(userName)
-	})
-}
-
-// 列出该用户发起的所有会议
-func (service *Service) ListAllSponsorMeetings(userName string) []model.Meeting {
-	return service.AgendaStorage.QueryMeetings(func(meeting model.Meeting) bool {
-		return meeting.GetSponsor() == userName
-	})
-}
-
-// 列出该用户参加的所有会议
-func (service *Service) ListAllParticipateMeetings(userName string) []model.Meeting {
-	return service.AgendaStorage.QueryMeetings(func(meeting model.Meeting) bool {
-		return meeting.IsParticipators(userName)
-	})
-}
-
-// 取消会议--发起者根据title删除会议
-func (service *Service) DeleteMeeting(sponsor string, title string) bool {
-	return service.AgendaStorage.DeleteMeetings(func(meeting model.Meeting) bool {
-		return meeting.GetTitle() == title && meeting.GetSponsor() == sponsor
-	})
-}
-
-// 退出会议 -- 参与者根据titile退出自己参加的会议安排
-// 若退出后人数为0，删除会议
-func (service *Service) QuitMeeting(participator string, title string) bool {
-	meetings := service.AgendaStorage.QueryMeetings(func(meeting model.Meeting) bool {
-		return meeting.GetTitle() == title && meeting.IsParticipators(participator)
-	})
-	for _, tMeeting := range meetings {
-		tMeeting.DeleteParticipator(participator)  // 删除一个会议参与者
-		if tMeeting.GetParticipatorsNumber() > 0 { // 会议还有参与者，更新会议数据
-			service.AgendaStorage.UpdateMeeting(func(meeting model.Meeting) bool {
-				return meeting.GetTitle() == tMeeting.GetTitle()
-			}, tMeeting)
-		} else { // 会议参与人数为0，删除该会议
-			service.AgendaStorage.DeleteMeetings(func(meeting model.Meeting) bool {
-				return meeting.GetTitle() == tMeeting.GetTitle()
-			})
-		}
-	}
-	return len(meetings) > 0
-}
-
-// 清空会议--删除用户自己发起的所有会议
-func (service *Service) DeleteAllMeetings(sponsor string) bool {
-	return service.AgendaStorage.DeleteMeetings(func(meeting model.Meeting) bool {
-		return meeting.GetSponsor() == sponsor
-	})
+	return http.StatusOK, UsersInfoResponse{Message: "get userlist successfully", SimgleUserInfoList: simgleUserInfoList}
 }
