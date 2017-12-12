@@ -20,21 +20,37 @@ Resource operations related to a user in the API.
 ### Get User Key [GET]
 
 get a security key for operations later
+get user key successfully -- 200/OK
+empty GET data -- 400/BadRequest
+incorrect username or password -- 401/Unauthorized
+if occurs error in sever -- 500/InternalServerError
 
 + Response 200 (application/json)
 
         {
             "key":"1e3576bt",
-            "status": true,
             "message": "get key successfully"
         }
+        
++ Response 400 (application/json)
 
+        {
+            "key":"",
+            "message": "empty username or password"
+        }
+        
 + Response 401 (application/json)
 
         {
             "key":"",
-            "status": false,
-            "message": "invalid username or password"
+            "message": "incorrect username or password"
+        }
+        
++ Response 500 (application/json)
+
+        {
+            "key":"",
+            "message": "server error"
         }
 
 
@@ -50,27 +66,50 @@ Resources related to users in the API.
 
 ### List all Users [GET]
 
+get users info successfully -- 200/OK
+invalid limit -- 400/BadRequest
+invalid key -- 401/Unauthorized
+if occurs error in sever -- 500/InternalServerError
+if get empty limit, defalut set to 5
+
 + Response 200 (application/json)
 
         [
-            {
-                "id":1，
-                "username":"zhang3"，
-                "phone":"12345678902"，
-                "email":"zhang3@mail2.sysu.edu.cn"，
-            },{
-                "id":2，
-                "username":"li4"，
-                "phone":"12345678901"，
-                "email":"li4@mail2.sysu.edu.cn"，
-            }
+            "Message":"get userlist successfully",
+            "SimgleUserInfoList":[
+                {
+                    "id":1，
+                    "username":"zhang3"，
+                    "phone":"12345678902"，
+                    "email":"zhang3@mail2.sysu.edu.cn"，
+                },{
+                    "id":2，
+                    "username":"li4"，
+                    "phone":"12345678901"，
+                    "email":"li4@mail2.sysu.edu.cn"，
+                }
+            ]
         ]
+
++ Response 400 (application/json)
+
+        {
+            "message": "invalid limit",
+            "SimgleUserInfoList":[]
+        }
 
 + Response 401 (application/json)
 
         {
-            "status": false,
-            "message": "invalid key"
+            "message": "invalid key",
+            "SimgleUserInfoList":[]
+        }
+
++ Response 500 (application/json)
+
+        {
+            "message": "server error",
+            "SimgleUserInfoList":[]
         }
 
 
@@ -80,7 +119,7 @@ Resources related to users in the API.
 
         {
             "username":"zhang3",
-            "password":"zhang",
+            "password":"seerfrgfg",
             "phone":"12345678901",
             "email":"zhang3@mail2.sysu.edu.cn",
         }
@@ -101,13 +140,18 @@ Resources related to users in the API.
 + Response 401 (application/json)
 
         {
-            "status": false,
-            "message": "invalid username or password"
+            "message": "incorrect username or password"
         }
 
 
 
 ### Get User by ID [GET /v1/users/{?id,key}]
+
+get users info successfully -- 200/OK
+empty id or invalid id -- 400/BadRequest
+invalid key -- 401/Unauthorized
+user get by id not exist -- 404/NotFound
+if occurs error in sever -- 500/InternalServerError
 
 + Parameters
     - key : `1e3576bt` (string, required)
@@ -116,22 +160,59 @@ Resources related to users in the API.
 + Response 200 (application/json)
 
         {
+            "message": "get user info successfully",
             "id" : 1,
             "username":"zhang3",
-            "password":"zhang",
             "phone":"12345678901",
             "email":"zhang3@mail2.sysu.edu.cn",
+        }
+
++ Response 400 (application/json)
+
+        {
+            "message": "invalid id",
+            "id" : -1,
+            "username":"",
+            "phone":"",
+            "email":""
         }
 
 + Response 401 (application/json)
 
         {
-            "status": false,
-            "message": "invalid key"
+            "message": "invalid key",
+            "id" : -1,
+            "username":"",
+            "phone":"",
+            "email":""
+        }
+        
++ Response 404 (application/json)
+
+        {
+            "message": "the user with id 1 not exists",
+            "id" : 1,
+            "username":"",
+            "phone":"",
+            "email":""
+        }
+        
++ Response 500 (application/json)
+
+        {
+            "message": "server error",
+            "id" : -1,
+            "username":"",
+            "phone":"",
+            "email":""
         }
 
-
 ### Delete a User [DELETE /v1/users/{?key,password}]
+
+delete user successfully and not return any message -- 204/NoContent
+empty password  -- 400/BadRequest
+invalid key or incorrect password -- 401/Unauthorized
+if occurs error in sever -- 500/InternalServerError
 
 + Parameters
     - key : `1e3576bt` (string, required)
@@ -139,45 +220,20 @@ Resources related to users in the API.
 
 + Response 204 
 
++ Response 400 (application/json)
+
+        {
+            "message": "empty password"
+        }
+
 + Response 401 (application/json)
 
         {
-            "status": false,
-            "message": "invalid key or password"
+            "message": "invalid key or incorrect password"
         }
 
-
-# Group Meetings
-
-Resources related to meetings in the API.
-
-## Meetings Collection [/v1/meetings/create/{?key}]
-
-+ Parameters
-
-    - key : `1e3576bt` (string, required)
-
-### Create a new meeting [POST]
-
-+ Request (application/json)
++ Response 500 (application/json)
 
         {
-            "title":"emmmmmm",
-            "sponsor":"zhang3",
-            "participators":"user1 user2 user3",
-            "starttime":"YYYY-MM-DD HH:MM:SS",
-            "endtime":"YYYY-MM-DD HH:MM:SS"
+            "message": "server error"
         }
-
-+ Response 201 (application/json)
-
-    - Headers
-
-            Location: /meetings/emmmmmm
-
-    - Body
-
-            {
-                "status": true,
-                "message": "create meeting successfully"
-            }
