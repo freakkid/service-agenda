@@ -27,14 +27,7 @@ var findCmd = &cobra.Command{
 	Long:  `Use this command to find user by id.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		id, _ := cmd.Flags().GetString("id")
-		retJson := struct {
-			Id			int		`json:"id"`
-			Username	string	`json:"username"`
-			Password	string	`json:"password"`
-			Phone		string	`json:"phone"`
-			Email		string	`json:"email"`
-		} {}
-		retJson = service.FindUser(id)
+		retJson := service.FindUser(id)
 		fmt.Printf("%-5s%-15s%-25s%-25s\n", "Id", "Username", "Phone number", "E-mail")
 		fmt.Printf("%-5d%-15s%-25s%-25s\n", retJson.Id, retJson.Username, retJson.Phone, retJson.Email)
 	},

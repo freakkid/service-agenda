@@ -8,13 +8,13 @@ import (
 	"io/ioutil"
 )
 
-func ListAllUsers () []RetJson {
+func ListAllUsers (limit string) []RetJson {
 	// list all user via http request
 	ok, session := GetCurrentUser()
 	if !ok {
 		fmt.Fprintln(os.Stderr, "Some mistakes happend in ListAllUsers")
 	}
-	resp, err := http.Get("https://polls.apiblueprint.org/v1/users?key="+session)
+	resp, err := http.Get("https://private-633936-serviceagenda.apiary-mock.com/v1/users?key="+session+"&limit="+limit)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "error : some mistakes happend in sending get request to server")
 	}
@@ -24,9 +24,41 @@ func ListAllUsers () []RetJson {
 		fmt.Fprintln(os.Stderr, "error : some mistakes happend in forming body")
 	}
 	// fmt.Println(string(body))
-	var temp []RetJson
-	if err := json.Unmarshal(body, &temp); err != nil {
-		fmt.Fprintln(os.Stderr, "error : some mistakes happend in parsing body")
+	if resp.StatusCode == 200 {
+		temp := struct {
+			Message				string
+			SingleUserInfoList	[]struct {
+				Id			int
+				Username	string
+				Phone		string
+				Email		string
+			}
+		} {}
+		if err := json.Unmarshal(body, &temp); err != nil {
+			fmt.Fprintln(os.Stderr, "error : some mistakes happend in parsing body")
+		}
+		ret := make([]RetJson, len(temp.SingleUserInfoList))
+		for index, each := range temp.SingleUserInfoList {
+			ret[index].Id = each.Id
+			ret[index].Username = each.Username
+			ret[index].Phone = each.Phone
+			ret[index].Email = each.Email
+		}
+		return ret
+	} else {
+		temp := struct {
+			Message				string
+			SingleUserInfoList	[]struct {
+				Id			int
+				Username	string
+				Phone		string
+				Email		string
+			}
+		} {}
+		if err := json.Unmarshal(body, &temp); err != nil {
+			fmt.Fprintln(os.Stderr, "error : "+temp.Message)
+		}
+		fmt.Fprintln(os.Stderr, temp.Message)
+		return []RetJson{}
 	}
-	return temp
 }

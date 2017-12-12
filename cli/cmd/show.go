@@ -26,8 +26,9 @@ var ushowCmd = &cobra.Command{
 	Short: "Show user account",
 	Long: `Use this command to show every user's information.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		limit, _ := cmd.Flags().GetString("limit")
 		var Item []service.RetJson
-		Item = service.ListAllUsers()
+		Item = service.ListAllUsers(limit)
 		fmt.Printf("%-5s%-15s%-25s%-25s\n", "Id", "Username", "Phone number", "E-mail")
 		for _, user := range Item{
 			fmt.Printf("%-5d%-15s%-25s%-25s\n", user.Id, user.Username, user.Phone, user.Email)
@@ -36,53 +37,8 @@ var ushowCmd = &cobra.Command{
 	},
 }
 
-var mshowCmd = &cobra.Command{
-	Use:   "show",
-	Short: "Show meeting information",
-	Long: `Use this command to show meeting information.`,
-	Run: func(cmd *cobra.Command, args []string) {
-// 		var Service service.Service
-// 		service.StartAgenda(&Service)
-// 		// check whether other user logged in
-// 		ok, name := Service.AutoUserLogin()
-// 		if ok == true {
-// 			fmt.Println(strings.Join([]string{name,"@:"}, ""))
-// 		}
-// 		if !ok {
-// 			fmt.Fprintln(os.Stderr, "error: No current logged user.")
-// 			log.LogInfoOrErrorIntoFile(name, false, fmt.Sprintf("Show meeting with no user login."))
-// 			os.Exit(0)
-// 		}
-		
-// 		if startTime == "" || endTime == "" {
-// 			fmt.Fprintln(os.Stderr, "error: Start time and end time is required.")
-// 			log.LogInfoOrErrorIntoFile(name, true, fmt.Sprintf("Show meeting with no invalid time."))
-// 			os.Exit(0)
-// 		}
-// 		meetingList := Service.MeetingQueryByUserAndTime(name, startTime, endTime)
-
-// 		// print all meetings with the given name
-// 		if len(meetingList) == 0 {
-// 			fmt.Println("--·--·--·--·--·--·--·--·--·--·--")
-// 			fmt.Println("No matching meeting")
-// 			fmt.Println("--·--·--·--·--·--·--·--·--·--·--")
-// 		} else {
-// 			fmt.Println("--·--·--·--·--·--·--·--·--·--·--")
-// 			for _, v := range meetingList {
-// 				fmt.Printf("Theme: %s\n", v.GetTitle())
-// 				fmt.Printf("Sponsor: %s\n", v.GetSponsor())
-// 				fmt.Printf("Start time: %s\n", v.GetStartDate())
-// 				fmt.Printf("End time: %s\n", v.GetEndDate())
-// 				fmt.Printf("Participator: %s\n", strings.Join(v.GetParticipators(), ", "))
-// 				fmt.Println("--·--·--·--·--·--·--·--·--·--·--")
-// 			}
-// 		}
-	},
-}
-
 func init() {
 	userCmd.AddCommand(ushowCmd)
-	meetingCmd.AddCommand(mshowCmd)
 
 	// Here you will define your flags and configuration settings.
 
@@ -93,6 +49,5 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// showCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	mshowCmd.Flags().StringVarP(&startTime, "start", "s", "", "Start time of meeting")
-	mshowCmd.Flags().StringVarP(&endTime, "end", "e", "", "End time of meeting")
+	ushowCmd.Flags().StringP("limit", "l", "2", "limit length of the result")
 }

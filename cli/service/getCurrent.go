@@ -5,8 +5,8 @@ import (
 )
 
 func GetCurrentUser() (bool, string) {
-	name , err := ioutil.ReadFile(UserFile)
-	if err != nil {
+	name , err := ioutil.ReadFile(UserFile)	
+	if err != nil || len(name) == 0 {
 		return false, "Some mistakes happend in read currentUserName from 'current-user'"
 	}
 	return true, string(name)

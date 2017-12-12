@@ -18,11 +18,11 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"strconv"
-	"strings"
+	// "strconv"
+	// "strings"
 	"github.com/spf13/cobra"
 	service "github.com/freakkid/service-agenda/cli/service"
-	log "github.com/txzdream/agenda-go/entity/tools"
+	// log "github.com/txzdream/agenda-go/entity/tools"
 )
 
 // createCmd represents the create command
@@ -35,6 +35,7 @@ var ucreateCmd = &cobra.Command{
 		createUsername, _ := cmd.Flags().GetString("username")
 		createEmail, _ := cmd.Flags().GetString("email")
 		createPhone, _ := cmd.Flags().GetString("phone")
+		limit, _ := cmd.Flags().GetString("limit")
 		// check whether username, password, email or phone empty
 		if createUsername == "" || createEmail == "" ||
 			createPhone == "" {
@@ -65,9 +66,10 @@ var ucreateCmd = &cobra.Command{
 			prePassword = createPassword
 		}
 		
-		err := service.CreateUser(createUsername, createPassword, createPhone, createEmail)
-		if err != nil {
-			fmt.Println(err)
+		ok := service.CreateUser(createUsername, createPassword, createPhone, createEmail, limit)
+		if  !ok  {
+			fmt.Fprintln(os.Stderr, "error : Some errors occur in service.CreateUser")
+			os.Exit(1)
 		}
 		fmt.Println("Sucess : Register ", createUsername)
 	},
@@ -86,6 +88,7 @@ func init() {
 	// is called directly, e.g.:
 	// createCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	// xiaxzh's part:
+	ucreateCmd.Flags().StringP("limit", "l", "2", "limit of result")
 	ucreateCmd.Flags().StringP("username", "u", "", "Create Username")
 	ucreateCmd.Flags().StringP("email", "e", "", "Create Email")
 	ucreateCmd.Flags().StringP("phone", "p", "", "Create Phone")
