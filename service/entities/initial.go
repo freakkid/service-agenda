@@ -1,8 +1,6 @@
 package entities
 
 import (
-	"fmt"
-
 	_ "github.com/mxk/go-sqlite/sqlite3" // as database driver of this programe
 
 	"github.com/go-xorm/core"
@@ -19,7 +17,6 @@ func checkErr(err error) {
 }
 
 func init() {
-	fmt.Printf("ddd")
 	var err error
 	// create engine
 	xormEngine, err = xorm.NewEngine("sqlite3", "./agenda.db")
@@ -29,5 +26,4 @@ func init() {
 
 	// sync the struct changes to database
 	checkErr(xormEngine.Sync2(new(User), new(Meeting), new(Participators)))
-
 }

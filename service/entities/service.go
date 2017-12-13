@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -44,7 +45,7 @@ type singleUserInfo struct {
 // UsersInfoResponse -- ListUsersByKeyAndLimit
 type UsersInfoResponse struct {
 	Message            string
-	SimgleUserInfoList []singleUserInfo
+	SingleUserInfoList []singleUserInfo
 }
 
 // CreateUserResponse -- CreateUser
@@ -63,23 +64,24 @@ func (*AgendaAtomicService) CreateUser(
 	if username == "" || password == "" || email == "" || phone == "" {
 		return http.StatusBadRequest, CreateUserResponse{Message: "empty input", ID: -1}
 	}
+	password = tools.MD5Encryption(password)
 	dao := agendaDao{xormEngine}
 	// ---- check username ----
-	user, err := dao.findUserByUsername(username)
-	if err != nil {
+	has, err := dao.ifUserExistByConditions(&User{UserName: username})
+	if err != nil { // server error
+		fmt.Println(err)
 		return http.StatusInternalServerError, CreateUserResponse{Message: "server error", ID: -1}
 	}
-	if user != nil {
+	if has { // username exist -- duplicate username
 		return http.StatusBadRequest, CreateUserResponse{Message: "duplicate username", ID: -1}
 	}
 	// ---- create user ----
-	user, err = dao.createUser(&User{UserName: username, Password: password, Email: email, Phone: phone})
-	if err != nil || user == nil {
-		return http.StatusInternalServerError, CreateUserResponse{Message: "server error", ID: -1}
+	result, user := dao.createUser(&User{Key: tools.GetKey(), UserName: username, Password: password, Email: email, Phone: phone})
+	if result && user != nil { // create user successfully
+		return http.StatusCreated, CreateUserResponse{"create user " + username + " successfully",
+			user.ID, user.UserName, user.Email, user.Phone}
 	}
-	// ---- create user successfully ----
-	return http.StatusCreated, CreateUserResponse{"create user" + username + "successfully",
-		user.ID, user.UserName, user.Email, user.Phone}
+	return http.StatusBadRequest, CreateUserResponse{Message: "maybe username is duplicate", ID: -1}
 }
 
 // GetUserKey --- check if user exists and generate key
@@ -90,24 +92,23 @@ func (*AgendaAtomicService) GetUserKey(username string, password string) (int, G
 	if username == "" || password == "" { // check if empty username and password
 		return http.StatusBadRequest, GetUserKeyResponse{"", "empty username and password"}
 	}
+	password = tools.MD5Encryption(password)
 	dao := agendaDao{xormEngine}
-	user, err := dao.findUserByUsernameAndPassword(username, tools.MD5Encryption(password))
+	has, err := dao.ifUserExistByConditions(&User{UserName: username, Password: password})
 	if err != nil { // server error
 		return http.StatusInternalServerError, GetUserKeyResponse{"", err.Error()}
 	}
-	if user == nil { // user not exist
+	if !has { // user not exist
 		return http.StatusUnauthorized, GetUserKeyResponse{"", "incorrect username or password"}
 	}
 	// ---- get new key ----
-	user.Key = tools.GetKey() // generate new key
-	affected, err := dao.updateUserKey(user, &User{UserName: username, Password: password})
+	var key = tools.GetKey() // generate new key
+	affected, _ := dao.updateUserKey(&User{Key: key}, &User{UserName: username, Password: password})
 	if affected == 0 { // user not exist
+		fmt.Println("?ssss")
 		return http.StatusUnauthorized, GetUserKeyResponse{"", "incorrect username or password"}
 	}
-	if err != nil { // server error
-		return http.StatusInternalServerError, GetUserKeyResponse{"", err.Error()}
-	}
-	return http.StatusOK, GetUserKeyResponse{user.Key, "get user key successfully"}
+	return http.StatusOK, GetUserKeyResponse{key, "get user key successfully"}
 }
 
 // GetUserByKeyAndID --- convert string id to int id, if occur error return empty user and error
@@ -117,15 +118,16 @@ func (*AgendaAtomicService) GetUserByKeyAndID(key string, stringID string) (int,
 	var (
 		id   int
 		err  error
+		has  bool
 		user *User
 	)
 	dao := agendaDao{xormEngine}
 	// ---- check key ----
-	user, err = dao.findUserByKey(key)
+	has, err = dao.ifUserExistByConditions(&User{Key: key})
 	if err != nil { // server error
 		return http.StatusInternalServerError, UserKeyResponse{Message: "server error", ID: -1}
 	}
-	if user == nil { // invalid key
+	if !has { // invalid key
 		return http.StatusUnauthorized, UserKeyResponse{Message: "invalid key", ID: -1}
 	}
 	// ---- check id ----
@@ -137,16 +139,13 @@ func (*AgendaAtomicService) GetUserByKeyAndID(key string, stringID string) (int,
 		return http.StatusBadRequest, UserKeyResponse{Message: "invalid id", ID: -1}
 	}
 	// ---- find user by id ----
-	user, err = dao.findUserByID(id)
-	if err != nil { // server error
-		return http.StatusInternalServerError, UserKeyResponse{Message: "server error", ID: -1}
+	has, user = dao.findUserByConditions(&User{ID: id})
+	if has && user != nil { // user not exist
+		return http.StatusOK,
+			UserKeyResponse{"get user info successfully", user.ID, user.UserName, user.Email, user.Phone}
 	}
-	if user == nil { // user not exist
-		return http.StatusNotFound,
-			UserKeyResponse{Message: "the user with id " + stringID + "not exists", ID: id}
-	}
-	return http.StatusOK,
-		UserKeyResponse{"get user info successfully", user.ID, user.UserName, user.Email, user.Phone}
+	return http.StatusNotFound,
+		UserKeyResponse{Message: "the user with id " + stringID + " not exists", ID: id}
 }
 
 // DeleteUserByKeyAndPassword --- check key if valid
@@ -154,16 +153,16 @@ func (*AgendaAtomicService) GetUserByKeyAndID(key string, stringID string) (int,
 func (*AgendaAtomicService) DeleteUserByKeyAndPassword(key string, password string) (int, DeleteUserResponse) {
 	var (
 		err      error
-		user     *User
+		has      bool
 		affected int64
 	)
 	dao := agendaDao{xormEngine}
 	// ---- check key ----
-	user, err = dao.findUserByKey(key)
+	has, err = dao.ifUserExistByConditions(&User{Key: key})
 	if err != nil { // server error
 		return http.StatusInternalServerError, DeleteUserResponse{Message: "server error"}
 	}
-	if user == nil { // invalid key
+	if !has { // invalid key
 		return http.StatusUnauthorized, DeleteUserResponse{Message: "invalid key"}
 	}
 	// ---- check password ----
@@ -186,18 +185,19 @@ func (*AgendaAtomicService) DeleteUserByKeyAndPassword(key string, password stri
 func (*AgendaAtomicService) ListUsersByKeyAndLimit(key string, stringLimit string) (int, UsersInfoResponse) {
 	var (
 		limit int
+
+		has   bool
 		err   error
-		user  *User
 		users []User
 	)
 	dao := agendaDao{xormEngine}
 	// ---- check key ----
-	user, err = dao.findUserByKey(key)
+	has, err = dao.ifUserExistByConditions(&User{Key: key})
 	if err != nil { // server error
-		return http.StatusInternalServerError, UsersInfoResponse{Message: "server error"}
+		return http.StatusInternalServerError, UsersInfoResponse{"server error", []singleUserInfo{}}
 	}
-	if user == nil { // invalid key
-		return http.StatusUnauthorized, UsersInfoResponse{Message: "invalid key"}
+	if !has { // if key not exist -- invalid key
+		return http.StatusUnauthorized, UsersInfoResponse{"invalid key", []singleUserInfo{}}
 	}
 	// ---- check limit ----
 	if stringLimit == "" {
@@ -205,18 +205,18 @@ func (*AgendaAtomicService) ListUsersByKeyAndLimit(key string, stringLimit strin
 	} else {
 		limit, err = strconv.Atoi(stringLimit)
 		if err != nil || limit <= 0 { // invalid limit
-			return http.StatusBadRequest, UsersInfoResponse{Message: "invalid limit"}
+			return http.StatusBadRequest, UsersInfoResponse{"invalid limit", []singleUserInfo{}}
 		}
 	}
 	// ---- get limit users ----
 	users, err = dao.getLimitUsers(limit)
 	if err != nil { // server error
-		return http.StatusInternalServerError, UsersInfoResponse{Message: "server error"}
+		return http.StatusInternalServerError, UsersInfoResponse{"server error", []singleUserInfo{}}
 	}
-	simgleUserInfoList := make([]singleUserInfo, 0, 0)
+	singleUserInfoList := make([]singleUserInfo, 0, 0)
 	for _, userInfo := range users {
-		simgleUserInfoList = append(simgleUserInfoList,
+		singleUserInfoList = append(singleUserInfoList,
 			singleUserInfo{userInfo.ID, userInfo.UserName, userInfo.Email, userInfo.Phone})
 	}
-	return http.StatusOK, UsersInfoResponse{Message: "get userlist successfully", SimgleUserInfoList: simgleUserInfoList}
+	return http.StatusOK, UsersInfoResponse{"get userlist successfully", singleUserInfoList}
 }

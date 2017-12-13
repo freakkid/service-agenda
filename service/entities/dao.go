@@ -10,23 +10,29 @@ type agendaDao struct {
 // ─── OPERATIONS ON USERS INTO DATABASE ───────────────────────────────────────────
 //
 
-// create user into database
-func (dao *agendaDao) createUser(user *User) (*User, error) {
-	_, err := dao.Insert(user)
-	if err != nil {
-		return nil, err
+// create user into database -- return result and id of user
+func (dao *agendaDao) createUser(user *User) (bool, *User) {
+	affected, _ := dao.Insert(user)
+	if affected == 1 {
+		return true, user
 	}
-	_, err = dao.Get(user)
-	return user, nil
+	return false, nil
 }
 
 func (dao *agendaDao) updateUserKey(user *User, selectedUser *User) (int64, error) {
 	return dao.Update(user, selectedUser)
 }
 
-func (dao *agendaDao) findUserByConditions(user *User) (*User, error) {
-	_, err := dao.Get(user)
-	return user, err
+func (dao *agendaDao) ifUserExistByConditions(user *User) (bool, error) {
+	return dao.Get(user)
+}
+
+func (dao *agendaDao) findUserByConditions(user *User) (bool, *User) {
+	has, err := dao.ifUserExistByConditions(user)
+	if has && err == nil {
+		return has, user
+	}
+	return has, nil
 }
 
 func (dao *agendaDao) findUserByUsername(username string) (*User, error) {
@@ -79,6 +85,7 @@ func (dao *agendaDao) deleteUserByKeyAndPassword(key string, password string) (i
 	return dao.Delete(&User{Key: key, Password: password})
 }
 
+//+++++++++++++++++++++++++++++The funtions below have not been used+++++++++++++++++++++++++++++++++++++++++++++++++
 //
 // ─── OPERATIONS ON MEETINGS INTO DATABASE ───────────────────────────────────────────
 //
