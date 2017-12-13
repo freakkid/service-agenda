@@ -30,7 +30,7 @@ func FindUser(id string) (bool, RetJson) {
 		fmt.Fprintln(os.Stderr, "Some mistakes happend in FindUser")
 		return false, RetJson{}
 	}
-	tarUrl := "http://private-633936-serviceagenda.apiary-mock.com/v1/users/?key="+session+"&id="+id
+	tarUrl := URL + "/v1/users/?key="+session+"&id="+id
 	resp, err := http.Get(tarUrl)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "error : Some mistakes happend in sending get request to tarUrl")
