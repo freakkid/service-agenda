@@ -15,7 +15,7 @@ func ListAllUsers (limit string) []RetJson {
 		fmt.Fprintln(os.Stderr, "Some mistakes happend in ListAllUsers")
 		return []RetJson{}
 	}
-	resp, err := http.Get("https://private-633936-serviceagenda.apiary-mock.com/v1/users?key="+session+"&limit="+limit)
+	resp, err := http.Get(URL + "/v1/users?key="+session+"&limit="+limit)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "error : some mistakes happend in sending get request to server")
 		return []RetJson{}

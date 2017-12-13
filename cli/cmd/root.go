@@ -31,7 +31,7 @@ var RootCmd = &cobra.Command{
 	Short: "Agenda system rewritten with golang.",
 	Long: `Service calculating homework for week 6 & 7. 
 This commline tools will help you manage your meetings. For more detail, 
-please use \'agenda help\' to begin.`,
+please use 'agenda help' to begin.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	//	Run: func(cmd *cobra.Command, args []string) { },
