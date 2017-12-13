@@ -2,6 +2,12 @@ package service
 
 import "testing"
 
+// {
+// 	"username":"zhang3",
+// 	"password":"seerfrgfg",
+// 	"phone":"12345678901",
+// 	"email":"zhang3@mail2.sysu.edu.cn",
+// }
 func TestCreateUser(t *testing.T) {
 	type args struct {
 		createUsername string
@@ -14,8 +20,10 @@ func TestCreateUser(t *testing.T) {
 		args args
 		want bool
 	}{
-		{"normal", args {"txz", "1", "11111111111", "1@1.com"}, true},
-		{"wrong", args {"", "", "", ""}, false},
+		{"2", args {"", "pass", "12345678901", "1@1.com"}, false},
+		{"2", args {"1", "", "12345678901", "1@1.com"}, false},
+		{"2", args {"1", "pass", "1", "1@1.com"}, false},
+		{"2", args {"1", "pass", "12345678901", "11.com"}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

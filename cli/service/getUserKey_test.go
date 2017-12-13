@@ -12,10 +12,8 @@ func TestGetUserKey(t *testing.T) {
 		args args
 		want bool
 	}{
-		{"normal", args {"txz", "1"}, true},
-		{"wrong password", args {"txz", "2"}, false},
-		{"wrong username", args {"t", ""}, false},
-		{"empty", args {"", ""}, false},
+		{"wrong password", args {"root", ""}, false},
+		{"wrong username", args {"", "pass"}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
