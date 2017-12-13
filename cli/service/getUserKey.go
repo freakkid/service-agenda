@@ -11,7 +11,7 @@ import (
 func GetUserKey(username string, password string) bool {
 	var times int
 	for {
-		tarUrl := "https://private-633936-serviceagenda.apiary-mock.com/v1/user/getkey?username=" + username + "&password=" +password
+		tarUrl := URL + "/v1/user/getkey?username=" + username + "&password=" +password
 		resp, err := http.Get(tarUrl)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "error : Some mistakes happend in sending get request to tarUrl")

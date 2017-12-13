@@ -17,7 +17,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strings"
 	"bufio"
 	service "github.com/freakkid/service-agenda/cli/service"
 	"github.com/spf13/cobra"
@@ -29,8 +28,6 @@ var udeleteCmd = &cobra.Command{
 	Short: "Delete user account",
 	Long: `Use this command to delete your account, meetings included.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		var Service service.Service
-
 		// hints to ensure and enter password to delete User
 		var password string
 		fmt.Print("Plase enter password: ")
@@ -38,12 +35,12 @@ var udeleteCmd = &cobra.Command{
 		data, _, _ := reader.ReadLine()
 		password = string(data)
 		// delete user and meetings it participate
-		ok, err := Service.DeleteUser(password)
+		ok, err := service.DeleteUser(password)
 		if !ok {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(0)
 		} else {
-			fmt.Fprintln("Success delete current user.")
+			fmt.Fprintln(os.Stderr, "Success delete current user.")
 		}
 	},
 }

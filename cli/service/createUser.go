@@ -13,7 +13,7 @@ func CreateUser(createUsername string, createPassword string, createPhone string
 	// regist user via http
 	// resp, err := http.PostForm("https://private-633936-serviceagenda.apiary-mock.com/v1/users?key="+session+"&limit="+limit, url.Values{"username":{createUsername}, "password":{createPassword}, "phone":{createPhone}, "email":{createEmail}})
 	reqBody := fmt.Sprintf("{\"username\": %v, \"password\": %v, \"phone\": %v, \"email\": %v}", createUsername, createPassword, createPhone, createEmail)
-	resp, err := http.Post("https://private-633936-serviceagenda.apiary-mock.com/v1/users", "application/json", bytes.NewBufferString(reqBody))
+	resp, err := http.Post(URL + "/v1/users", "application/json", bytes.NewBufferString(reqBody))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return false
