@@ -9,43 +9,43 @@ Service Agenda is a simple API allowing users to magage their agendas.
 # Group User
 
 Resource operations related to a user in the API.
+    
+## User-Key [v1/user]
 
-## User-Key [/v1/user/getkey{?username,password}]
+get a security key for operations later
+    
+### Get User Key [GET /getkey{?username,password}]
+
 
 + Parameters
 
-    - username : `root` (string, required) - User Name
-    - password : `pass` (string, required)
-
-### Get User Key [GET]
-
-get a security key for operations later;
-get user key successfully -- 200/OK;
-empty GET data -- 400/BadRequest;
-incorrect username or password -- 401/Unauthorized;
-if occurs error in sever -- 500/InternalServerError
+    - username : `user1` (string, required)
+    - password : `pass1` (string, required)
 
 + Response 200 (application/json)
 
         {
-            "key":"1e3576bt",
+            "key":"8182f6fa-ba54-4c7e-95d7-2bf3eedd0939",
             "message": "get key successfully"
         }
-        
+
+
 + Response 400 (application/json)
 
         {
             "key":"",
             "message": "empty username or password"
         }
-        
+
+
 + Response 401 (application/json)
 
         {
             "key":"",
             "message": "incorrect username or password"
         }
-        
+
+
 + Response 500 (application/json)
 
         {
@@ -58,19 +58,14 @@ if occurs error in sever -- 500/InternalServerError
 
 Resources related to users in the API.
 
-## Users Collection [/v1/users{?key,limit}]
+## Users Collection [/v1/users]
+
+### List all Users [GET /v1/users{?key,limit}]
 
 + Parameters
-    - key : `1e3576bt` (string, required)
-    - limit : 2 (int, required)
-
-### List all Users [GET]
-
-get users info successfully -- 200/OK;
-invalid limit -- 400/BadRequest;
-invalid key -- 401/Unauthorized;
-if occurs error in sever -- 500/InternalServerError;
-if get empty limit, defalut set to 5
+    - key : `1e3576bt` (optional,string)
+    - limit : 2 (optional,int) 
+        + Defalut 5
 
 + Response 200 (application/json)
 
@@ -90,6 +85,7 @@ if get empty limit, defalut set to 5
                 }
             ]
         }
+        
 
 + Response 400 (application/json)
 
@@ -98,12 +94,14 @@ if get empty limit, defalut set to 5
             "SimgleUserInfoList":[]
         }
 
+
 + Response 401 (application/json)
 
         {
             "message": "invalid key",
             "SimgleUserInfoList":[]
         }
+
 
 + Response 500 (application/json)
 
@@ -114,10 +112,6 @@ if get empty limit, defalut set to 5
 
 
 ### Create a New User [POST]
-
-create a user successfully -- 201/Created;
-empty input or duplicate username -- 400/BadRequest;
-if occurs error in sever -- 500/InternalServerError;
 
 + Request (application/json)
 
@@ -162,17 +156,11 @@ if occurs error in sever -- 500/InternalServerError;
         }
         
 
-### Get User by ID [GET /v1/users/{?id,key}]
-
-get users info successfully -- 200/OK;
-empty id or invalid id -- 400/BadRequest;
-invalid key -- 401/Unauthorized;
-user get by id not exist -- 404/NotFound;
-if occurs error in sever -- 500/InternalServerError
+### Get User by ID [GET /v1/users/{id}{?key}]
 
 + Parameters
     - key : `1e3576bt` (string, required)
-    - id : `1` (int, required) - User Name
+    - id : `1` (int, required) 
 
 + Response 200 (application/json)
 
@@ -224,12 +212,8 @@ if occurs error in sever -- 500/InternalServerError
             "email":""
         }
 
-### Delete a User [DELETE /v1/users/{?key,password}]
+### Delete a User [DELETE /v1/users/{id}{?key,password}]
 
-delete user successfully and not return any message -- 204/NoContent;
-empty password  -- 400/BadRequest;
-invalid key or incorrect password -- 401/Unauthorized;
-if occurs error in sever -- 500/InternalServerError
 
 + Parameters
     - key : `1e3576bt` (string, required)
@@ -249,6 +233,38 @@ if occurs error in sever -- 500/InternalServerError
             "message": "invalid key or incorrect password"
         }
 
++ Response 500 (application/json)
+
+        {
+            "message": "server error"
+        }
+
+### Update Password [GET /v1/users/{id}{?key,password,newpassword,confirmation}]
+
++ Parameters
+    - key : `1e3576bt` (string, required)
+    - password : `dfgh1` (string, required) - old password
+    - newpassword : `fguhi1` (string, required) - new password
+    - confimation : `fguhi1` (string, required) - new password comfirmation
+
++ Response 200 (application/json)
+
+        {
+            "message": "update password successfully"
+        }
+
++ Response 400 (application/json)
+
+        {
+            "message": "new password is empty"
+        }
+
++ Response 401 (application/json)
+
+        {
+            "message": "invalid key"
+        }
+        
 + Response 500 (application/json)
 
         {
