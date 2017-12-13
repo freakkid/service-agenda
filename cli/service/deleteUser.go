@@ -17,7 +17,7 @@ func DeleteUser(password string) (bool, error) {
 	if !ok {
 		return false, errors.New("Some mistakes happend in FindUser")
 	}
-	url := "https://private-633936-serviceagenda.apiary-mock.com/v1/users/?key="+session+"&password="+password
+	url := URL + "/v1/users/?key="+session+"&password="+password
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
 		return false, errors.New("Can not construct DELETE request.")

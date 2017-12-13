@@ -2,6 +2,8 @@ FROM golang:1.8
 RUN mkdir -p /go/src/github.com/freakkid/service-agenda/
 WORKDIR /go/src/github.com/freakkid/service-agenda/
 COPY . .
+ENV SERVER_ADDR=agendad
+ENV PORT=80
 
 WORKDIR /go/src/github.com/freakkid/service-agenda/cli
 RUN go-wrapper download

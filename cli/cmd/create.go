@@ -35,7 +35,6 @@ var ucreateCmd = &cobra.Command{
 		createUsername, _ := cmd.Flags().GetString("username")
 		createEmail, _ := cmd.Flags().GetString("email")
 		createPhone, _ := cmd.Flags().GetString("phone")
-		limit, _ := cmd.Flags().GetString("limit")
 		// check whether username, password, email or phone empty
 		if createUsername == "" || createEmail == "" ||
 			createPhone == "" {
@@ -66,7 +65,7 @@ var ucreateCmd = &cobra.Command{
 			prePassword = createPassword
 		}
 		
-		ok := service.CreateUser(createUsername, createPassword, createPhone, createEmail, limit)
+		ok := service.CreateUser(createUsername, createPassword, createPhone, createEmail)
 		if  !ok  {
 			fmt.Fprintln(os.Stderr, "error : Some errors occur in service.CreateUser")
 			os.Exit(1)
