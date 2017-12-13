@@ -17,7 +17,6 @@ func checkErr(err error) {
 }
 
 func init() {
-
 	var err error
 	// create engine
 	xormEngine, err = xorm.NewEngine("sqlite3", "./agenda.db")

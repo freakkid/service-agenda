@@ -3,3 +3,6 @@
 test
 ex-service-agenda.html
 *.db
+main
+agenda
+npm-debug.log

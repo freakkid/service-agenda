@@ -7,7 +7,7 @@ import (
 // User is an entity to save user info with username is primary key.
 type User struct {
 	ID       int    `xorm:"pk autoincr"`
-	Key      string `xorm:"varchar(255) notnull unique"`
+	Key      string `xorm:"varchar(255) unique"`
 	UserName string `xorm:"varchar(255) notnull unique"`
 	Password string `xorm:"varchar(255) notnull"`
 	Email    string `xorm:"varchar(255) notnull"`
@@ -25,17 +25,19 @@ type Meeting struct {
 	EndTime   *time.Time `xorm:"DateTime notnull"`
 }
 
-// Participator of meeting select by title
+// Participators is Participator of meeting select by title
 type Participators struct {
 	Title        string `xorm:"varchar(255) notnull"`
 	Participator string `xorm:"varchar(255) notnull"`
 }
 
+// MeetingParticipators to join data of two tables
 type MeetingParticipators struct {
 	Meeting       `xorm:"extends"`
 	Participators `xorm:"extends"`
 }
 
+// UserMeeting to join data of two tables
 type UserMeeting struct {
 	User    `xorm:"extends"`
 	Meeting `xorm:"extends"`

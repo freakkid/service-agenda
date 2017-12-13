@@ -1,7 +1,7 @@
 package service
 
 import (
-	"net/url"
+	"bytes"
 	"fmt"
 	"os"
 	"encoding/json"
@@ -9,14 +9,11 @@ import (
 	"net/http"
 )
 
-func CreateUser(createUsername string, createPassword string, createPhone string, createEmail string, limit string) bool {
-	ok, session := GetCurrentUser()
-	if !ok {
-		fmt.Fprintln(os.Stderr, "Some mistakes happend in createUser")
-		return false
-	}
+func CreateUser(createUsername string, createPassword string, createPhone string, createEmail string) bool {
 	// regist user via http
-	resp, err := http.PostForm("https://private-633936-serviceagenda.apiary-mock.com/v1/users?key="+session+"&limit="+limit, url.Values{"username":{createUsername}, "password":{createPassword}, "phone":{createPhone}, "email":{createEmail}})
+	// resp, err := http.PostForm("https://private-633936-serviceagenda.apiary-mock.com/v1/users?key="+session+"&limit="+limit, url.Values{"username":{createUsername}, "password":{createPassword}, "phone":{createPhone}, "email":{createEmail}})
+	reqBody := fmt.Sprintf("{\"username\": %v, \"password\": %v, \"phone\": %v, \"email\": %v}", createUsername, createPassword, createPhone, createEmail)
+	resp, err := http.Post("https://private-633936-serviceagenda.apiary-mock.com/v1/users", "application/json", bytes.NewBufferString(reqBody))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return false
@@ -29,7 +26,6 @@ func CreateUser(createUsername string, createPassword string, createPhone string
 		return false
 	}
 
-	fmt.Println(string(body))
 	if resp.StatusCode == 201  {
 		temp := struct {
 			Status 		bool
