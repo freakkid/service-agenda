@@ -1,3 +1,7 @@
-language: go-1.8
-xcode_project: ./
-xcode_scheme:
+language: go
+go:
+    - 1.8
+
+
+# xcode_project: ./
+# xcode_scheme:
