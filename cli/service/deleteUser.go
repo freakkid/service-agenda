@@ -11,7 +11,6 @@ import (
 
 func DeleteUser(password string) (bool, error) {
 	type RetJson struct {
-		Status	bool	`json:"status"`
 		Message	string	`json:"message"`
 	}
 	ok, session := GetCurrentUser()

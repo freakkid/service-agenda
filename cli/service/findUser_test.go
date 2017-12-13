@@ -14,8 +14,9 @@ func TestFindUser(t *testing.T) {
 		args args
 		want bool
 	}{
-		{"normal", args {"1"}, true},
-		{"wrong", args {""}, false},
+		{"1", args {""}, false},
+		{"2", args {"1q"}, false},
+		{"3", args {"qq"}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

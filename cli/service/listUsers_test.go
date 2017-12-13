@@ -11,8 +11,11 @@ func TestListAllUsers(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
+		want []RetJson
 	}{
-		{"normal", args {"5"}},
+		{"normal", args {"5"}, []RetJson{}},
+		{"wrong limit1", args {"-1"}, []RetJson{}},
+		{"wrong limit2", args {"2"}, []RetJson{}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

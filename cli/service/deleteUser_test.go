@@ -12,9 +12,7 @@ func TestDeleteUser(t *testing.T) {
 		want    bool
 		wantErr bool
 	}{
-		{"wrong password", args {"2"}, false, true},
-		{"normal", args {"1"}, true, false},
-		{"empty", args {""}, false, true},
+		{"wrong password", args {""}, false, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
