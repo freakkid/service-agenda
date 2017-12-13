@@ -18,6 +18,8 @@ import (
 	"fmt"
 	service "github.com/freakkid/service-agenda/cli/service"
 	"github.com/spf13/cobra"
+	tools	"github.com/freakkid/service-agenda/cli/tools"
+	"os"
 )
 
 // showCmd represents the show command
@@ -27,6 +29,14 @@ var ushowCmd = &cobra.Command{
 	Long: `Use this command to show every user's information.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		limit, _ := cmd.Flags().GetString("limit")
+
+		// validate	
+		ok, message := tools.ValidateLimit(limit)
+		if !ok {
+			fmt.Fprintln(os.Stderr, message)
+			os.Exit(1)
+		}
+
 		var Item []service.RetJson
 		Item = service.ListAllUsers(limit)
 		fmt.Printf("%-5s%-15s%-25s%-25s\n", "Id", "Username", "Phone number", "E-mail")

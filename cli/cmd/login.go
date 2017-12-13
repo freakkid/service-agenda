@@ -20,6 +20,7 @@ import (
 	"os"
 	"github.com/spf13/cobra"
 	service "github.com/freakkid/service-agenda/cli/service"
+	tools	"github.com/freakkid/service-agenda/cli/tools"
 )
 
 // loginCmd represents the login command
@@ -29,25 +30,26 @@ var loginCmd = &cobra.Command{
 	Long:  `Use this command to sign in to the system.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		username, _ := cmd.Flags().GetString("username")
-		// check whether username empty
-		if username == "" {
-			fmt.Fprintln(os.Stderr, "error : Username is empty")
-			os.Exit(1)
-		}
 		// wait for password
 		var password string
 		fmt.Printf("Please enter the password: ")
 		reader := bufio.NewReader(os.Stdin)
 		data, _, _ := reader.ReadLine()
 		password = string(data)
-		// check the password empty
-		if password == "" {
-			fmt.Fprintln(os.Stderr, "error : Password is empty")
+
+		// validate	
+		ok, message := tools.ValidateUsername(username)
+		if !ok {
+			fmt.Fprintln(os.Stderr, message)
 			os.Exit(1)
 		}
-
+		ok, message = tools.ValidatePass(password)
+		if !ok {
+			fmt.Fprintln(os.Stderr, message)
+			os.Exit(1)
+		}
 		// get user key
-		ok := service.GetUserKey(username, password)
+		ok = service.GetUserKey(username, password)
 		if !ok {
 			fmt.Fprintln(os.Stderr, "Some mistakes happend in login.go")
 		}
