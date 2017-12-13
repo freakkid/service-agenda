@@ -18,11 +18,9 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	// "strconv"
-	// "strings"
 	"github.com/spf13/cobra"
 	service "github.com/freakkid/service-agenda/cli/service"
-	// log "github.com/txzdream/agenda-go/entity/tools"
+	tools	"github.com/freakkid/service-agenda/cli/tools"
 )
 
 // createCmd represents the create command
@@ -36,6 +34,7 @@ var ucreateCmd = &cobra.Command{
 		createEmail, _ := cmd.Flags().GetString("email")
 		createPhone, _ := cmd.Flags().GetString("phone")
 		// check whether username, password, email or phone empty
+
 		if createUsername == "" || createEmail == "" ||
 			createPhone == "" {
 			fmt.Fprintln(os.Stderr, "error : Username, Email or Phone is(are) empty")
@@ -65,7 +64,28 @@ var ucreateCmd = &cobra.Command{
 			prePassword = createPassword
 		}
 		
-		ok := service.CreateUser(createUsername, createPassword, createPhone, createEmail)
+		// validate	
+		ok, message := tools.ValidateUsername(createUsername)
+		if !ok {
+			fmt.Fprintln(os.Stderr, message)
+			os.Exit(1)
+		}
+		ok, message = tools.ValidatePhone(createPhone)
+		if !ok {
+			fmt.Fprintln(os.Stderr, message)
+			os.Exit(1)
+		}
+		ok, message = tools.ValidateEmail(createEmail)
+		if !ok {
+			fmt.Fprintln(os.Stderr, message)
+			os.Exit(1)
+		}
+		ok, message = tools.ValidatePass(createPassword)
+		if !ok {
+			fmt.Fprintln(os.Stderr, message)
+			os.Exit(1)
+		}
+		ok = service.CreateUser(createUsername, createPassword, createPhone, createEmail)
 		if  !ok  {
 			fmt.Fprintln(os.Stderr, "error : Some errors occur in service.CreateUser")
 			os.Exit(1)

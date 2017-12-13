@@ -19,6 +19,7 @@ import (
 	"os"
 	"bufio"
 	service "github.com/freakkid/service-agenda/cli/service"
+	tools	"github.com/freakkid/service-agenda/cli/tools"
 	"github.com/spf13/cobra"
 )
 
@@ -34,6 +35,12 @@ var udeleteCmd = &cobra.Command{
 		reader := bufio.NewReader(os.Stdin)
 		data, _, _ := reader.ReadLine()
 		password = string(data)
+		// validate
+		ok, message := tools.ValidatePass(password)
+		if !ok {
+			fmt.Fprintf(os.Stderr, message)
+			os.Exit(1)
+		}
 		// delete user and meetings it participate
 		ok, err := service.DeleteUser(password)
 		if !ok {
