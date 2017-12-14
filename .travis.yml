@@ -3,12 +3,8 @@ language: go
 go:
     - 1.8
 
-before_script:
-    - rm *.db
 
 script:
     # - go test ./cli/service/
     - go test ./service/entities
 
-after_script:
-    - rm *.db
