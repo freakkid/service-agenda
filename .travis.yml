@@ -4,7 +4,4 @@ go:
     - 1.8
 
 script:
-    - cd cli/service
-    - go test
-    - cd ../../service
     - 

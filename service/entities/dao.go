@@ -6,11 +6,7 @@ type agendaDao struct {
 	*xorm.Engine
 }
 
-//
-// ─── OPERATIONS ON USERS INTO DATABASE ───────────────────────────────────────────
-//
-
-// create user into database -- return result and id of user
+// create user into database
 func (dao *agendaDao) createUser(user *User) (bool, *User) {
 	affected, _ := dao.Insert(user)
 	if affected == 1 {
@@ -19,14 +15,17 @@ func (dao *agendaDao) createUser(user *User) (bool, *User) {
 	return false, nil
 }
 
+// uptate userinfo by condition is selectedUser
 func (dao *agendaDao) updateUser(user *User, selectedUser *User) (int64, error) {
 	return dao.Update(user, selectedUser)
 }
 
+// find user
 func (dao *agendaDao) ifUserExistByConditions(user *User) (bool, error) {
 	return dao.Get(user)
 }
 
+// get user
 func (dao *agendaDao) findUserByConditions(user *User) (bool, *User) {
 	has, err := dao.ifUserExistByConditions(user)
 	if has && err == nil {
