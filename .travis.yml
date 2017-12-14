@@ -6,5 +6,9 @@ go:
 
 script:
     # - go test ./cli/service/
+    - go build ./service/main.go 
     - go test ./service/entities
 
+
+# after_script:
+#     - rm ./service/entities/agenda.db
