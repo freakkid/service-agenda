@@ -121,7 +121,7 @@ func (*AgendaAtomicService) LoginAndGetSessionID(username string, password strin
 // GetUserInfoByID --- convert string id to int id, if occur error return empty user and error
 // check if key is valid and id exsits and belong to the same user
 // if valid key and exist id, return User struct
-func (*AgendaAtomicService) GetUserInfoByID(key string, stringID string) (int, UserKeyResponse) {
+func (*AgendaAtomicService) GetUserInfoByID(sessionID string, stringID string) (int, UserKeyResponse) {
 	var (
 		id   int
 		err  error
@@ -129,13 +129,13 @@ func (*AgendaAtomicService) GetUserInfoByID(key string, stringID string) (int, U
 		user *User
 	)
 	dao := agendaDao{xormEngine}
-	// ---- check key ----
-	has, err = dao.ifUserExistByConditions(&User{SessionID: key})
+	// ---- check sessionID ----
+	has, err = dao.ifUserExistByConditions(&User{SessionID: sessionID})
 	if err != nil { // server error
 		return http.StatusInternalServerError, UserKeyResponse{Message: "server error", ID: -1}
 	}
-	if !has { // invalid key
-		return http.StatusUnauthorized, UserKeyResponse{Message: "invalid key", ID: -1}
+	if !has { // invalid sessionID
+		return http.StatusUnauthorized, UserKeyResponse{Message: "please re-login", ID: -1}
 	}
 	// ---- check id ----
 	if stringID == "" { // empty id
@@ -143,7 +143,7 @@ func (*AgendaAtomicService) GetUserInfoByID(key string, stringID string) (int, U
 	}
 	id, err = strconv.Atoi(stringID)
 	if err != nil || id <= 0 { // invalid id
-		return http.StatusBadRequest, UserKeyResponse{Message: "invalid id", ID: -1}
+		return http.StatusBadRequest, UserKeyResponse{Message: "invalid id", ID: id}
 	}
 	// ---- find user by id ----
 	has, user = dao.findUserByConditions(&User{ID: id})
@@ -157,7 +157,7 @@ func (*AgendaAtomicService) GetUserInfoByID(key string, stringID string) (int, U
 
 // DeleteUserByPassword --- check key if valid
 // check if password correct
-func (*AgendaAtomicService) DeleteUserByPassword(key string, password string) (int, SingleMessageResponse) {
+func (*AgendaAtomicService) DeleteUserByPassword(sessionID string, password string) (int, SingleMessageResponse) {
 	var (
 		err      error
 		has      bool
@@ -165,18 +165,18 @@ func (*AgendaAtomicService) DeleteUserByPassword(key string, password string) (i
 	)
 	dao := agendaDao{xormEngine}
 	// ---- check key ----
-	has, err = dao.ifUserExistByConditions(&User{SessionID: key})
+	has, err = dao.ifUserExistByConditions(&User{SessionID: sessionID})
 	if err != nil { // server error
 		return http.StatusInternalServerError, SingleMessageResponse{Message: "server error"}
 	}
-	if !has { // invalid key
-		return http.StatusUnauthorized, SingleMessageResponse{Message: "invalid key"}
+	if !has { // invalid sessionID
+		return http.StatusUnauthorized, SingleMessageResponse{Message: "please re-login"}
 	}
 	// ---- check password ----
 	if password == "" { // empty input
 		return http.StatusBadRequest, SingleMessageResponse{"empty password"}
 	}
-	affected, err = dao.deleteUserByKeyAndPassword(key, tools.MD5Encryption(password))
+	affected, err = dao.deleteUserByKeyAndPassword(sessionID, tools.MD5Encryption(password))
 	if err != nil { // server error
 		return http.StatusInternalServerError, SingleMessageResponse{Message: "server error"}
 	}
@@ -188,22 +188,24 @@ func (*AgendaAtomicService) DeleteUserByPassword(key string, password string) (i
 }
 
 // ListUsersByLimit --- check key is valid or not
-// if limit is invalid, default set to 10
-func (*AgendaAtomicService) ListUsersByLimit(key string, stringLimit string, stringOffset string) (int, UsersInfoResponse) {
+// if limit is invalid, default set to 5
+// if offset is invalid, default set to 0
+func (*AgendaAtomicService) ListUsersByLimit(sessionID string, stringLimit string, stringOffset string) (int, UsersInfoResponse) {
 	var (
-		limit int
-		has   bool
-		err   error
-		users []User
+		limit  int
+		offset int
+		has    bool
+		err    error
+		users  []User
 	)
 	dao := agendaDao{xormEngine}
 	// ---- check key ----
-	has, err = dao.ifUserExistByConditions(&User{SessionID: key})
+	has, err = dao.ifUserExistByConditions(&User{SessionID: sessionID})
 	if err != nil { // server error
 		return http.StatusInternalServerError, UsersInfoResponse{"server error", []singleUserInfo{}}
 	}
-	if !has { // if key not exist -- invalid key
-		return http.StatusUnauthorized, UsersInfoResponse{"invalid key", []singleUserInfo{}}
+	if !has { // if sessionID not exist -- invalid sessionID
+		return http.StatusUnauthorized, UsersInfoResponse{"please re-login", []singleUserInfo{}}
 	}
 	// ---- check limit ----
 	if stringLimit == "" {
@@ -214,8 +216,17 @@ func (*AgendaAtomicService) ListUsersByLimit(key string, stringLimit string, str
 			return http.StatusBadRequest, UsersInfoResponse{"invalid limit", []singleUserInfo{}}
 		}
 	}
-	// ---- get limit users ----
-	users, err = dao.getLimitUsers(limit)
+	// ---- check offset ----
+	if stringOffset == "" {
+		offset = 5
+	} else {
+		offset, err = strconv.Atoi(stringOffset)
+		if err != nil || offset < 0 { // invalid limit
+			return http.StatusBadRequest, UsersInfoResponse{"invalid offset", []singleUserInfo{}}
+		}
+	}
+	// ---- get limit, offset users ----
+	users, err = dao.getLimitUsers(limit, offset)
 	if err != nil { // server error
 		return http.StatusInternalServerError, UsersInfoResponse{"server error", []singleUserInfo{}}
 	}
@@ -230,23 +241,23 @@ func (*AgendaAtomicService) ListUsersByLimit(key string, stringLimit string, str
 // ChangeUserPassword -- check if key is valid
 // check if password is correct
 // check if new password valid and match confirmation
-func ChangeUserPassword(key string, password string, newPassword string, confirmation string) (int, SingleMessageResponse) {
+func ChangeUserPassword(sessionID string, password string, newPassword string, confirmation string) (int, SingleMessageResponse) {
 	var (
 		has      bool
 		err      error
 		affected int64
 	)
 	dao := agendaDao{xormEngine}
-	// ---- check key ----
-	has, err = dao.ifUserExistByConditions(&User{SessionID: key})
+	// ---- check sessionID ----
+	has, err = dao.ifUserExistByConditions(&User{SessionID: sessionID})
 	if err != nil { // server error
 		return http.StatusInternalServerError, SingleMessageResponse{"server error"}
 	}
-	if !has { // if key not exist -- invalid key
-		return http.StatusUnauthorized, SingleMessageResponse{"invalid key"}
+	if !has { // if sessionID not exist -- invalid sessionID
+		return http.StatusUnauthorized, SingleMessageResponse{"please re-login"}
 	}
 	// ---- check old password ----
-	has, err = dao.ifUserExistByConditions(&User{SessionID: key, Password: password})
+	has, err = dao.ifUserExistByConditions(&User{SessionID: sessionID, Password: password})
 	if err != nil { // server error
 		return http.StatusInternalServerError, SingleMessageResponse{"server error"}
 	}
@@ -261,7 +272,7 @@ func ChangeUserPassword(key string, password string, newPassword string, confirm
 		return http.StatusBadRequest, SingleMessageResponse{"new password and confirmation do not match"}
 	}
 	// ---- update new password ----
-	affected, _ = dao.updateUser(&User{Password: newPassword}, &User{SessionID: key, Password: password})
+	affected, _ = dao.updateUser(&User{Password: newPassword}, &User{SessionID: sessionID, Password: password})
 	if affected == 0 { // user not exist
 		return http.StatusUnauthorized, SingleMessageResponse{"incorrect password"}
 	}
@@ -271,9 +282,6 @@ func ChangeUserPassword(key string, password string, newPassword string, confirm
 // LogoutAndDeleteSessionID -- logout and update sessionid
 func LogoutAndDeleteSessionID(sessionID string) (int, SingleMessageResponse) {
 	// ---- check sessionID ----
-	if sessionID == "" { // check if empty sessionID
-		return http.StatusUnauthorized, SingleMessageResponse{"log out fail"}
-	}
 	dao := agendaDao{xormEngine}
 	has, err := dao.ifUserExistByConditions(&User{SessionID: sessionID})
 	if err != nil { // server error

@@ -36,12 +36,15 @@ func (dao *agendaDao) findUserByConditions(user *User) (bool, *User) {
 }
 
 // get all users info
-func (dao *agendaDao) getLimitUsers(limitNumber int) ([]User, error) {
+func (dao *agendaDao) getLimitUsers(limitNumber int, offsetNumber int) ([]User, error) {
 	if limitNumber <= 0 {
 		limitNumber = 5
 	}
+	if offsetNumber < 0 {
+		offsetNumber = 0
+	}
 	var userList = make([]User, 0, 0)
-	err := dao.Limit(limitNumber).Find(&userList)
+	err := dao.Limit(limitNumber, offsetNumber).Find(&userList)
 	return userList, err
 }
 
