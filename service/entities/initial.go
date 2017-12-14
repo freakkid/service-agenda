@@ -25,5 +25,5 @@ func init() {
 	xormEngine.SetMapper(core.GonicMapper{})
 
 	// sync the struct changes to database
-	checkErr(xormEngine.Sync2(new(User), new(Meeting), new(Participators)))
+	checkErr(xormEngine.Sync2(new(User)))
 }

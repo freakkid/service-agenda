@@ -25,10 +25,12 @@ func NewServer() *negroni.Negroni {
 
 func initRoutes(muxInstance *mux.Router, formatter *render.Render) {
 
-	muxInstance.HandleFunc("/v1/user/getkey", userGetKeyHandler(formatter)).Methods("GET")
-	muxInstance.HandleFunc("/v1/users", usersHandler(formatter)).Methods("GET")
+	muxInstance.HandleFunc("/v1/user/login", userLoginHandler(formatter)).Methods("GET")
+	muxInstance.HandleFunc("/v1/users", usersInfoHandler(formatter)).Methods("GET")
+	muxInstance.HandleFunc("/v1/users/", usersInfoHandler(formatter)).Methods("GET")
 	muxInstance.HandleFunc("/v1/users", createUserHandler(formatter)).Methods("POST")
-	muxInstance.HandleFunc("/v1/users", deleteUserHandler(formatter)).Methods("DELETE")
+	muxInstance.HandleFunc("/v1/users/", deleteUserHandler(formatter)).Methods("DELETE")
+	muxInstance.HandleFunc("/v1/users/", changeUserPassword(formatter)).Methods("PATCH")
 
 	muxInstance.NotFoundHandler = notImplementedHandler() // redirect 404 to 501
 }
