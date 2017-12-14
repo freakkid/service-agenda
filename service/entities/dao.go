@@ -53,9 +53,9 @@ func (dao *agendaDao) countAllUsers() (int64, error) {
 	return dao.Count(new(User))
 }
 
-// delete user by key and password
-func (dao *agendaDao) deleteUserByKeyAndPassword(key string, password string) (int64, error) {
-	return dao.Delete(&User{SessionID: key, Password: password})
+// delete user by sessionID and password
+func (dao *agendaDao) deleteUserBySessionIDAndIDAndPassword(sessionID string, id int, password string) (int64, error) {
+	return dao.Delete(&User{SessionID: sessionID, ID: id, Password: password})
 }
 
 //+++++++++++++++++++++++++++++The funtions below have not been used+++++++++++++++++++++++++++++++++++++++++++++++++
