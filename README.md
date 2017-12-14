@@ -1,5 +1,7 @@
 # service-agenda
 
+[![Build Status](https://travis-ci.org/freakkid/service-agenda.svg?branch=master)](https://travis-ci.org/freakkid/service-agenda)
+
 ## maintainer
 TangXuanzhao xuanzhaotang@gmail.com
 

@@ -2,6 +2,8 @@ package tools
 
 import (
 	"crypto/md5"
+	"crypto/rand"
+	"encoding/base64"
 	"fmt"
 	"io"
 
@@ -22,4 +24,13 @@ func MD5Encryption(text string) string {
 // GetKey creating UUID as key
 func GetKey() string {
 	return uuid.NewV4().String()
+}
+
+// GenenrateSessionID generate UID as session id
+func GenenrateSessionID() string {
+	b := make([]byte, 32)
+	if _, err := io.ReadFull(rand.Reader, b); err != nil {
+		return ""
+	}
+	return base64.URLEncoding.EncodeToString(b)
 }

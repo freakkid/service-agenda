@@ -6,13 +6,15 @@ import (
 
 // User is an entity to save user info with username is primary key.
 type User struct {
-	ID       int    `xorm:"pk autoincr"`
-	Key      string `xorm:"varchar(255) unique"`
-	UserName string `xorm:"varchar(255) notnull unique"`
-	Password string `xorm:"varchar(255) notnull"`
-	Email    string `xorm:"varchar(255) notnull"`
-	Phone    string `xorm:"varchar(255) notnull"`
+	ID        int    `xorm:"pk autoincr"`
+	SessionID string `xorm:"varchar(255) unique"`
+	UserName  string `xorm:"varchar(255) notnull unique"`
+	Password  string `xorm:"varchar(255) notnull"`
+	Email     string `xorm:"varchar(255) notnull"`
+	Phone     string `xorm:"varchar(255) notnull"`
 }
+
+// ++++++++++++++++++ the code below have not been used ++++++++++++++++++
 
 // Meeting is an entity to save meeting info with title is primary key,
 // names of particulars will created by join string array with space,
