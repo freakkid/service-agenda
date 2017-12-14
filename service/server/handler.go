@@ -27,8 +27,10 @@ func userLogoutHandler(formatter *render.Render) http.HandlerFunc {
 		cookie, _ := req.Cookie(req.FormValue("username")) // get cookie
 		if cookie == nil {
 			formatter.JSON(w, http.StatusUnauthorized, entities.SingleMessageResponse{Message: "please sign in to Agenda"})
+		} else {
+			status, responseJSON := entities.AgendaService.LogoutAndDeleteSessionID(cookie.Value)
+			formatter.JSON(w, status, responseJSON)
 		}
-		formatter.JSON(w, status, responseJSON)
 	}
 }
 
@@ -39,13 +41,14 @@ func usersInfoHandler(formatter *render.Render) http.HandlerFunc {
 		cookie, _ := req.Cookie(req.FormValue("username")) // get cookie
 		if cookie == nil {
 			formatter.JSON(w, http.StatusUnauthorized, entities.SingleMessageResponse{Message: "please sign in to Agenda"})
-		}
-		if req.FormValue("id") != "" {
-			status, responseJSON := entities.AgendaService.GetUserInfoByID(cookie.Value, req.FormValue("id"))
-			formatter.JSON(w, status, responseJSON)
 		} else {
-			status, responseJSON := entities.AgendaService.ListUsersByLimit(cookie.Value, req.FormValue("limit"), req.FormValue("offset"))
-			formatter.JSON(w, status, responseJSON)
+			if req.FormValue("id") != "" {
+				status, responseJSON := entities.AgendaService.GetUserInfoByID(cookie.Value, req.FormValue("id"))
+				formatter.JSON(w, status, responseJSON)
+			} else {
+				status, responseJSON := entities.AgendaService.ListUsersByLimit(cookie.Value, req.FormValue("limit"), req.FormValue("offset"))
+				formatter.JSON(w, status, responseJSON)
+			}
 		}
 	}
 }
@@ -66,7 +69,7 @@ func deleteUserHandler(formatter *render.Render) http.HandlerFunc {
 		req.ParseForm()                                    // parsing the parameters
 		cookie, _ := req.Cookie(req.FormValue("username")) // get cookie
 		if cookie == nil {
-			formatter.JSON(w, http.StatusUnauthorized, entities.SingleMessageResponse{Message: "you have logged out"})
+			formatter.JSON(w, http.StatusUnauthorized, entities.SingleMessageResponse{Message: "please sign in to Agenda"})
 		}
 		status, responseJSON := entities.AgendaService.DeleteUserByPassword(cookie.Value, req.FormValue("password"))
 		formatter.JSON(w, status, responseJSON)
