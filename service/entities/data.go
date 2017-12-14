@@ -4,8 +4,8 @@ package entities
 // ─── TO BE JSON RESPONSE ───────────────────────────────────────────────────────────
 //
 
-// UserKeyResponse -- GetUserByKeyAndID
-type UserKeyResponse struct {
+// UserInfoResponse -- GetUserByKeyAndID
+type UserInfoResponse struct {
 	Message  string
 	ID       int
 	UserName string
@@ -32,15 +32,6 @@ type UsersInfoResponse struct {
 	SingleUserInfoList []singleUserInfo
 }
 
-// CreateUserResponse -- CreateUser
-type CreateUserResponse struct {
-	Message  string
-	ID       int
-	UserName string
-	Email    string
-	Phone    string
-}
-
 // ────────────────────────────────────────────────────────────────────────────────
 
 //
@@ -58,8 +49,8 @@ const (
 	CreateUserSuceed = "create user successfully"
 	//FailCreateUser .
 	FailCreateUser = "fail to create user"
-	// EmptyUsernameAndPassword .
-	EmptyUsernameAndPassword = "empty username and password"
+	// EmptyUsernameOrPassword .
+	EmptyUsernameOrPassword = "empty username or password"
 	// EmptyPassword .
 	EmptyPassword = "empty password"
 	// IncorrectUsernameAndPassword .

@@ -19,28 +19,28 @@ var AgendaService = AgendaAtomicService{}
 
 // CreateUser -- check if input is empty and username is duplicate
 func (*AgendaAtomicService) CreateUser(
-	username string, password string, email string, phone string) (int, CreateUserResponse) {
+	username string, password string, email string, phone string) (int, UserInfoResponse) {
 	// ---- check input ----
 	if username == "" || password == "" || email == "" || phone == "" {
-		return http.StatusBadRequest, CreateUserResponse{Message: EmptyInput, ID: -1}
+		return http.StatusBadRequest, UserInfoResponse{Message: EmptyInput, ID: -1}
 	}
 	password = tools.MD5Encryption(password)
 	dao := agendaDao{xormEngine}
 	// ---- check username ----
 	has, err := dao.ifUserExistByConditions(&User{UserName: username})
 	if err != nil { // server error
-		return http.StatusInternalServerError, CreateUserResponse{Message: ServerError, ID: -1}
+		return http.StatusInternalServerError, UserInfoResponse{Message: ServerError, ID: -1}
 	}
 	if has { // username exist -- duplicate username
-		return http.StatusBadRequest, CreateUserResponse{Message: DuplicateUsername, ID: -1}
+		return http.StatusBadRequest, UserInfoResponse{Message: DuplicateUsername, ID: -1}
 	}
 	// ---- create user ----
 	result, user := dao.createUser(&User{SessionID: tools.GetKey(),
 		UserName: username, Password: password, Email: email, Phone: phone})
 	if result && user != nil { // create user successfully
-		return http.StatusCreated, CreateUserResponse{CreateUserSuceed, user.ID, user.UserName, user.Email, user.Phone}
+		return http.StatusCreated, UserInfoResponse{CreateUserSuceed, user.ID, user.UserName, user.Email, user.Phone}
 	}
-	return http.StatusBadRequest, CreateUserResponse{Message: FailCreateUser, ID: -1}
+	return http.StatusBadRequest, UserInfoResponse{Message: FailCreateUser, ID: -1}
 }
 
 // LoginAndGetSessionID --- check if user exists and generate new sessionID
@@ -50,7 +50,7 @@ func (*AgendaAtomicService) LoginAndGetSessionID(
 	username string, password string) (string, int, SingleMessageResponse) {
 	// ---- check username and password ----
 	if username == "" || password == "" { // check if empty username and password
-		return "", http.StatusBadRequest, SingleMessageResponse{EmptyUsernameAndPassword}
+		return "", http.StatusBadRequest, SingleMessageResponse{EmptyUsernameOrPassword}
 	}
 	password = tools.MD5Encryption(password)
 	dao := agendaDao{xormEngine}
@@ -79,7 +79,7 @@ func (*AgendaAtomicService) LoginAndGetSessionID(
 // GetUserInfoByID --- check if sessionID is valid and id exsits and belong to the same user
 // convert string id to int id, if occur error return empty user and error
 // if valid key and exist id, return User struct
-func (*AgendaAtomicService) GetUserInfoByID(sessionID string, stringID string) (int, UserKeyResponse) {
+func (*AgendaAtomicService) GetUserInfoByID(sessionID string, stringID string) (int, UserInfoResponse) {
 	var (
 		id   int
 		err  error
@@ -90,26 +90,26 @@ func (*AgendaAtomicService) GetUserInfoByID(sessionID string, stringID string) (
 	// ---- check sessionID ----
 	has, err = dao.ifUserExistByConditions(&User{SessionID: sessionID})
 	if err != nil { // server error
-		return http.StatusInternalServerError, UserKeyResponse{Message: ServerError, ID: -1}
+		return http.StatusInternalServerError, UserInfoResponse{Message: ServerError, ID: -1}
 	}
 	if !has { // invalid sessionID
-		return http.StatusUnauthorized, UserKeyResponse{Message: ReLogin, ID: -1}
+		return http.StatusUnauthorized, UserInfoResponse{Message: ReLogin, ID: -1}
 	}
 	// ---- check id ----
 	if stringID == "" { // empty id
-		return http.StatusBadRequest, UserKeyResponse{Message: EmptyID, ID: -1}
+		return http.StatusBadRequest, UserInfoResponse{Message: EmptyID, ID: -1}
 	}
 	id, err = strconv.Atoi(stringID)
 	if err != nil || id <= 0 { // invalid id
-		return http.StatusBadRequest, UserKeyResponse{Message: InvalidID, ID: id}
+		return http.StatusBadRequest, UserInfoResponse{Message: InvalidID, ID: id}
 	}
 	// ---- find user by id ----
 	has, user = dao.findUserByConditions(&User{ID: id})
 	if has && user != nil { // user not exist
 		return http.StatusOK,
-			UserKeyResponse{GetUserInfoSucceed, user.ID, user.UserName, user.Email, user.Phone}
+			UserInfoResponse{GetUserInfoSucceed, user.ID, user.UserName, user.Email, user.Phone}
 	}
-	return http.StatusNotFound, UserKeyResponse{Message: NotExistedID, ID: id}
+	return http.StatusNotFound, UserInfoResponse{Message: NotExistedID, ID: id}
 }
 
 // DeleteUserByPassword --- check if sessionID valid and password correct
@@ -226,6 +226,7 @@ func (*AgendaAtomicService) ChangeUserPassword(sessionID string, stringID string
 		return http.StatusBadRequest, SingleMessageResponse{Message: InvalidID}
 	}
 	// ---- check old password ----
+	password = tools.MD5Encryption(password)
 	has, err = dao.ifUserExistByConditions(&User{SessionID: sessionID, ID: id, Password: password})
 	if err != nil { // server error
 		return http.StatusInternalServerError, SingleMessageResponse{ServerError}
@@ -241,6 +242,7 @@ func (*AgendaAtomicService) ChangeUserPassword(sessionID string, stringID string
 		return http.StatusBadRequest, SingleMessageResponse{NotMatchPassword}
 	}
 	// ---- update new password ----
+	newPassword = tools.MD5Encryption(newPassword)
 	affected, _ = dao.updateUser(&User{Password: newPassword},
 		&User{SessionID: sessionID, ID: id, Password: password})
 	if affected == 0 { // user not exist
