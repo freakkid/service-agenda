@@ -1,17 +1,17 @@
-package service 
+package service
 
 import (
-	"io/ioutil"
-	"os"
-	"fmt"
-	"net/http"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"os"
 )
 
 func GetUserKey(username string, password string) bool {
 	var times int
 	for {
-		tarUrl := URL + "/v1/user/getkey?username=" + username + "&password=" +password
+		tarUrl := URL + "/v1/user/login?username=" + username + "&password=" + password
 		resp, err := http.Get(tarUrl)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "error : Some mistakes happend in sending get request to tarUrl")
@@ -23,16 +23,11 @@ func GetUserKey(username string, password string) bool {
 			fmt.Fprintln(os.Stderr, "error ： Some mistakes happend in forming body")
 			return false
 		}
-		temp := struct {
-			Key			string
-			Status		bool
-			Message		string
-		} {}
+		temp := SingleMessageResponse{}
 		if err = json.Unmarshal(body, &temp); err != nil {
 			fmt.Fprintln(os.Stderr, "error: some mistakes happend in parsing body")
 			return false
-		} 
-
+		}
 		// fmt.Println(string(body))
 		if resp.StatusCode != 200 {
 			fmt.Println(temp.Message)
@@ -45,10 +40,26 @@ func GetUserKey(username string, password string) bool {
 				return false
 			}
 		} else {
-			// write to file -- session
-			err := ioutil.WriteFile(SessionFile, []byte(temp.Key), 0655) 
+			session := ""
+			for _, item := range resp.Cookies() {
+				if item.Name == username {
+					session = item.Value
+				}
+			}
+			if session == "" {
+				fmt.Fprintln(os.Stderr, "error : session should not be empty")
+				return false
+			}
+			fmt.Println("Geted session : " + session)
+			// write to file -- user
+			err = ioutil.WriteFile(UserFile, []byte(username), 0655)
 			if err != nil {
-				fmt.Fprintln(os.Stderr, "Some mistakes happend in write to session")
+				fmt.Fprintln(os.Stderr, "Some mistakes happend in writing to current user")
+			}
+			// write to file -- session
+			err = ioutil.WriteFile(SessionFile, []byte(session), 0655)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, "Some mistakes happend in writing to session")
 				return false
 			}
 			break

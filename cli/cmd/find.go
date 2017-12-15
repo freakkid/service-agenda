@@ -15,11 +15,12 @@
 package cmd
 
 import (
-	"os"
 	"fmt"
-	"github.com/spf13/cobra"
+	"os"
+
 	service "github.com/freakkid/service-agenda/cli/service"
-	tools	"github.com/freakkid/service-agenda/cli/tools"
+	tools "github.com/freakkid/service-agenda/cli/tools"
+	"github.com/spf13/cobra"
 )
 
 // loginCmd represents the login command
@@ -32,17 +33,15 @@ var findCmd = &cobra.Command{
 
 		// validate
 		ok, message := tools.ValidateId(id)
-		if !ok {
-			fmt.Fprintln(os.Stderr, message)
-			os.Exit(1)
-		}
+		tools.DealMessage(ok, message)
+
 		ok, retJson := service.FindUser(id)
 		if !ok {
 			fmt.Println("Nothing to display.")
 			os.Exit(1)
 		}
 		fmt.Printf("%-5s%-15s%-25s%-25s\n", "Id", "Username", "Phone number", "E-mail")
-		fmt.Printf("%-5d%-15s%-25s%-25s\n", retJson.Id, retJson.Username, retJson.Phone, retJson.Email)
+		fmt.Printf("%-5d%-15s%-25s%-25s\n", retJson.ID, retJson.UserName, retJson.Phone, retJson.Email)
 	},
 }
 

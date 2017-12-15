@@ -18,9 +18,10 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"github.com/spf13/cobra"
+
 	service "github.com/freakkid/service-agenda/cli/service"
-	tools	"github.com/freakkid/service-agenda/cli/tools"
+	tools "github.com/freakkid/service-agenda/cli/tools"
+	"github.com/spf13/cobra"
 )
 
 // createCmd represents the create command
@@ -33,13 +34,6 @@ var ucreateCmd = &cobra.Command{
 		createUsername, _ := cmd.Flags().GetString("username")
 		createEmail, _ := cmd.Flags().GetString("email")
 		createPhone, _ := cmd.Flags().GetString("phone")
-		// check whether username, password, email or phone empty
-
-		if createUsername == "" || createEmail == "" ||
-			createPhone == "" {
-			fmt.Fprintln(os.Stderr, "error : Username, Email or Phone is(are) empty")
-			os.Exit(1)
-		}
 		// get the password
 		var createPassword string
 		var prePassword string
@@ -63,33 +57,19 @@ var ucreateCmd = &cobra.Command{
 			times *= -1
 			prePassword = createPassword
 		}
-		
-		// validate	
+		// validate
 		ok, message := tools.ValidateUsername(createUsername)
-		if !ok {
-			fmt.Fprintln(os.Stderr, message)
-			os.Exit(1)
-		}
+		tools.DealMessage(ok, message)
 		ok, message = tools.ValidatePhone(createPhone)
-		if !ok {
-			fmt.Fprintln(os.Stderr, message)
-			os.Exit(1)
-		}
+		tools.DealMessage(ok, message)
 		ok, message = tools.ValidateEmail(createEmail)
-		if !ok {
-			fmt.Fprintln(os.Stderr, message)
-			os.Exit(1)
-		}
+		tools.DealMessage(ok, message)
 		ok, message = tools.ValidatePass(createPassword)
-		if !ok {
-			fmt.Fprintln(os.Stderr, message)
-			os.Exit(1)
-		}
+		tools.DealMessage(ok, message)
+		// send create request
 		ok = service.CreateUser(createUsername, createPassword, createPhone, createEmail)
-		if  !ok  {
-			fmt.Fprintln(os.Stderr, "error : Some errors occur in service.CreateUser")
-			os.Exit(1)
-		}
+		tools.DealMessage(ok, message)
+
 		fmt.Println("Sucess : Register ", createUsername)
 	},
 }
@@ -107,7 +87,6 @@ func init() {
 	// is called directly, e.g.:
 	// createCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	// xiaxzh's part:
-	ucreateCmd.Flags().StringP("limit", "l", "2", "limit of result")
 	ucreateCmd.Flags().StringP("username", "u", "", "Create Username")
 	ucreateCmd.Flags().StringP("email", "e", "", "Create Email")
 	ucreateCmd.Flags().StringP("phone", "p", "", "Create Phone")
