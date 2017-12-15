@@ -1,16 +1,33 @@
 package entities
 
 import (
+	"bytes"
+	"encoding/json"
+	"io"
+	"io/ioutil"
 	"reflect"
 	"testing"
 )
 
 func TestAgendaAtomicService_CreateUser(t *testing.T) {
+	b, err := json.Marshal(&UserInfo{Username: "hnx", Password: "123", Email: "email@qq.com", Phone: "12345678901"})
+	checkErr(err)
+	p := ioutil.NopCloser(bytes.NewReader(b))
+
+	b1, err1 := json.Marshal(&UserInfo{Username: "hnx", Password: "123", Email: "email@qq.com", Phone: "12345678901"})
+	checkErr(err1)
+	p1 := ioutil.NopCloser(bytes.NewReader(b1))
+
+	b2, err2 := json.Marshal(&UserInfo{Username: "", Password: "123", Email: "email@qq.com", Phone: "12345678901"})
+	checkErr(err2)
+	p2 := ioutil.NopCloser(bytes.NewReader(b2))
+
+	b3, err3 := json.Marshal(&UserInfo{Username: "hnx2", Password: "123", Email: "email@qq.com", Phone: "12345678901"})
+	checkErr(err3)
+	p3 := ioutil.NopCloser(bytes.NewReader(b3))
+
 	type args struct {
-		username string
-		password string
-		email    string
-		phone    string
+		body io.ReadCloser
 	}
 	tests := []struct {
 		name  string
@@ -20,39 +37,41 @@ func TestAgendaAtomicService_CreateUser(t *testing.T) {
 		want1 UserInfoResponse
 	}{
 		{
-			name:  "create",
-			args:  args{username: "hnx", password: "123", email: "email@qq.com", phone: "12345678901"},
+			name:  "create user",
+			args:  args{p},
 			want:  201,
 			want1: UserInfoResponse{Message: CreateUserSuceed, ID: 1, UserName: "hnx", Email: "email@qq.com", Phone: "12345678901"},
 		},
 		{
 			name:  "duplicate name",
-			args:  args{username: "hnx", password: "123", email: "email@qq.com", phone: "12345678901"},
+			args:  args{p1},
 			want:  400,
 			want1: UserInfoResponse{Message: DuplicateUsername, ID: -1, UserName: "", Email: "", Phone: ""},
 		},
 		{
 			name:  "empty input",
-			args:  args{username: "", password: "123", email: "email@qq.com", phone: "12345678901"},
+			args:  args{p2},
 			want:  400,
 			want1: UserInfoResponse{Message: EmptyInput, ID: -1, UserName: "", Email: "", Phone: ""},
 		},
-		{name: "successful",
-			args:  args{username: "hnx2", password: "123", email: "email@qq.com", phone: "12345678901"},
+		{
+			name:  "successful",
+			args:  args{p3},
 			want:  201,
 			want1: UserInfoResponse{Message: CreateUserSuceed, ID: 2, UserName: "hnx2", Email: "email@qq.com", Phone: "12345678901"},
 		},
 	}
-
 	for _, tt := range tests {
-		a := &AgendaAtomicService{}
-		got, got1 := a.CreateUser(tt.args.username, tt.args.password, tt.args.email, tt.args.phone)
-		if got != tt.want {
-			t.Errorf("%q. AgendaAtomicService.CreateUser() got = %v, want %v", tt.name, got, tt.want)
-		}
-		if !reflect.DeepEqual(got1, tt.want1) {
-			t.Errorf("%q. AgendaAtomicService.CreateUser() got1 = %v, want %v", tt.name, got1, tt.want1)
-		}
+		t.Run(tt.name, func(t *testing.T) {
+			a := &AgendaAtomicService{}
+			got, got1 := a.CreateUser(tt.args.body)
+			if !reflect.DeepEqual(got1, tt.want1) {
+				t.Errorf("AgendaAtomicService.CreateUser() got1 = %v, want %v", got1, tt.want1)
+			}
+			if got != tt.want {
+				t.Errorf("AgendaAtomicService.CreateUser() got = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
 
