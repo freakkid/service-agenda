@@ -31,6 +31,7 @@ func initRoutes(muxInstance *mux.Router, formatter *render.Render) {
 	muxInstance.HandleFunc("/v1/users", createUserHandler(formatter)).Methods("POST")
 	muxInstance.HandleFunc("/v1/users/", deleteUserHandler(formatter)).Methods("DELETE")
 	muxInstance.HandleFunc("/v1/users/", changeUserPassword(formatter)).Methods("PATCH")
+	muxInstance.HandleFunc("/v1/user/logout", userLogoutHandler(formatter)).Methods("DELETE")
 
 	muxInstance.NotFoundHandler = notImplementedHandler() // redirect 404 to 501
 }
