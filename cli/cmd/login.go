@@ -18,9 +18,10 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"github.com/spf13/cobra"
+
 	service "github.com/freakkid/service-agenda/cli/service"
-	tools	"github.com/freakkid/service-agenda/cli/tools"
+	tools "github.com/freakkid/service-agenda/cli/tools"
+	"github.com/spf13/cobra"
 )
 
 // loginCmd represents the login command
@@ -37,21 +38,16 @@ var loginCmd = &cobra.Command{
 		data, _, _ := reader.ReadLine()
 		password = string(data)
 
-		// validate	
+		// validate
 		ok, message := tools.ValidateUsername(username)
-		if !ok {
-			fmt.Fprintln(os.Stderr, message)
-			os.Exit(1)
-		}
+		tools.DealMessage(ok, message)
 		ok, message = tools.ValidatePass(password)
-		if !ok {
-			fmt.Fprintln(os.Stderr, message)
-			os.Exit(1)
-		}
-		// get user key
+		tools.DealMessage(ok, message)
+		// send login request
 		ok = service.GetUserKey(username, password)
 		if !ok {
 			fmt.Fprintln(os.Stderr, "Some mistakes happend in login.go")
+			os.Exit(1)
 		}
 		fmt.Println("Succed login as ", username)
 	},
