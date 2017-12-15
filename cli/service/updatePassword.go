@@ -13,12 +13,13 @@ func UpdatePassword(old, new, confirm string) (bool, error){
 	type RetJson struct {
 		Message	string	`json:"message"`
 	}
-	ok, name := GetCurrentUser()
+	ok, name, session := GetCurrentUser()
 	if !ok {
 		return false, errors.New("Some mistakes happend in FindUser")
 	}
 	url := URL + "/v1/users/" + name + "?password=" + old + "&newpassword=" + new + "&confirmation=" + confirm
 	req, err := http.NewRequest("PATCH", url, nil)
+	req.Header.Set("cookie", name + "=" + session)
 	if err != nil {
 		return false, errors.New("Can not construct PATCH request.")
 	}

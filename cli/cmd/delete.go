@@ -47,7 +47,7 @@ var udeleteCmd = &cobra.Command{
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(0)
 		} else {
-			fmt.Fprintln(os.Stderr, "Success delete current user.")
+			fmt.Fprintln(os.Stdout, "Success delete current user.")
 		}
 	},
 }

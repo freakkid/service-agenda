@@ -13,12 +13,13 @@ func DeleteUser(password string) (bool, error) {
 	type RetJson struct {
 		Message string `json:"message"`
 	}
-	ok, _, session := GetCurrentUser()
+	ok, name, session := GetCurrentUser()
 	if !ok {
 		return false, errors.New("Some mistakes happend in FindUser")
 	}
 	url := URL + "/v1/users/?key=" + session + "&password=" + password
 	req, err := http.NewRequest("DELETE", url, nil)
+	req.Header.Set("cookie", name + "=" + session)
 	if err != nil {
 		return false, errors.New("Can not construct DELETE request.")
 	}
