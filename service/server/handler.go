@@ -109,7 +109,7 @@ func changeUserPassword(formatter *render.Render) http.HandlerFunc {
 		} else {
 			lastIndex := strings.LastIndex(req.URL.Path, "/")
 			if lastIndex != -1 {
-				status, responseJSON := entities.AgendaService.ChangeUserPassword(cookie.Value, req.URL.Path[lastIndex:],
+				status, responseJSON := entities.AgendaService.ChangeUserPassword(cookie.Value, req.URL.Path[lastIndex+1:],
 					req.FormValue("password"), req.FormValue("newpassword"), req.FormValue("confirmation"))
 				formatter.JSON(w, status, responseJSON)
 			} else {
