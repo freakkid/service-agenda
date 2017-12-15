@@ -41,6 +41,15 @@ func ValidateId(i string) (bool, string) {
 	return true, ""
 }
 
+func ValidateOffset(i string) (bool, string) {
+	for _, i1 := range i {
+		if !(i1 <= '9' && i1 >= '0') {
+			return false, "Invalid Offset"
+		}
+	}
+	return true, ""
+}
+
 func ValidatePhone(p string) (bool, string) {
 	if len(p) != 11 {
 		return false, "Invalid phone length"
