@@ -42,7 +42,7 @@ func (*AgendaAtomicService) CreateUser(body io.ReadCloser) (int, UserInfoRespons
 		return http.StatusBadRequest, UserInfoResponse{Message: DuplicateUsername, ID: -1}
 	}
 	// ---- create user ----
-	result, user := dao.createUser(&User{SessionID: tools.GetKey(),
+	result, user := dao.createUser(&User{SessionID: tools.GenenrateSessionID(),
 		UserName: userInfo.Username, Password: userInfo.Password, Email: userInfo.Email, Phone: userInfo.Phone})
 	if result && user != nil { // create user successfully
 		return http.StatusCreated, UserInfoResponse{CreateUserSuceed, user.ID, user.UserName, user.Email, user.Phone}
