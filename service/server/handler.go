@@ -15,7 +15,7 @@ func userLoginHandler(formatter *render.Render) http.HandlerFunc {
 		req.ParseForm() // parsing the parameters
 		sessionID, status, responseJSON := entities.AgendaService.LoginAndGetSessionID(req.FormValue("username"), req.FormValue("password"))
 		if sessionID != "" || status == http.StatusOK { // login successfully and set cookie
-			http.SetCookie(w, &http.Cookie{Name: req.FormValue("username"), Value: url.QueryEscape(sessionID)})
+			http.SetCookie(w, &http.Cookie{Name: req.FormValue("username"), Value: sessionID})
 		}
 		formatter.JSON(w, status, responseJSON)
 	}
