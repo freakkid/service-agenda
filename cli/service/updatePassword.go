@@ -1,15 +1,15 @@
 package service
 
 import (
-	"errors"
+	"os"
+	"fmt"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"fmt"
-	"os"
+	"errors"
 )
 
-func DeleteUser(password string) (bool, error) {
+func UpdatePassword(old, new, confirm string) (bool, error){
 	type RetJson struct {
 		Message	string	`json:"message"`
 	}
@@ -17,20 +17,20 @@ func DeleteUser(password string) (bool, error) {
 	if !ok {
 		return false, errors.New("Some mistakes happend in FindUser")
 	}
-	url := URL + "/v1/users/" + name  + "?password="+password
-	req, err := http.NewRequest("DELETE", url, nil)
+	url := URL + "/v1/users/" + name + "?password=" + old + "&newpassword=" + new + "&confirmation=" + confirm
+	req, err := http.NewRequest("PATCH", url, nil)
 	if err != nil {
-		return false, errors.New("Can not construct DELETE request.")
+		return false, errors.New("Can not construct PATCH request.")
 	}
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return false, errors.New("Send delete request failed.")
+		return false, errors.New("Send patch request failed.")
 	}
 
 	defer res.Body.Close()
-	if res.StatusCode == 204 {
+	if res.StatusCode == 200 {
 		return true, nil
-	} else if res.StatusCode < 500 && res.StatusCode >= 400{
+	} else if res.StatusCode < 500 && res.StatusCode >= 400 {
 		body, err := ioutil.ReadAll(res.Body)
 		if err != nil {
 			return false, errors.New("Fail to read body.")

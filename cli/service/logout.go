@@ -1,15 +1,15 @@
 package service
 
 import (
-	"errors"
+	"os"
+	"fmt"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"fmt"
-	"os"
+	"errors"
 )
 
-func DeleteUser(password string) (bool, error) {
+func Logout() (bool, error) {
 	type RetJson struct {
 		Message	string	`json:"message"`
 	}
@@ -17,8 +17,10 @@ func DeleteUser(password string) (bool, error) {
 	if !ok {
 		return false, errors.New("Some mistakes happend in FindUser")
 	}
-	url := URL + "/v1/users/" + name  + "?password="+password
+
+	url := URL + "/v1/user/logout/" + name
 	req, err := http.NewRequest("DELETE", url, nil)
+	req.Header.Set("cookie", name + "=" + name)
 	if err != nil {
 		return false, errors.New("Can not construct DELETE request.")
 	}
