@@ -6,30 +6,37 @@ package entities
 
 // UserInfoResponse -- GetUserByKeyAndID
 type UserInfoResponse struct {
-	Message  string
-	ID       int
-	UserName string
-	Email    string
-	Phone    string
+	Message  string `json:"message"`
+	ID       int    `json:"id"`
+	UserName string `json:"username"`
+	Email    string `json:"email"`
+	Phone    string `json:"phone"`
 }
 
 // SingleMessageResponse -- DeleteUserByKeyAndPassword/ChangeUserPassword/GetUserKey
 type SingleMessageResponse struct {
-	Message string
+	Message string `json:"message"`
 }
 
 // used in UsersInfoResponse
 type singleUserInfo struct {
-	ID       int
-	UserName string
-	Email    string
-	Phone    string
+	ID       int    `json:"id"`
+	UserName string `json:"username"`
+	Email    string `json:"email"`
+	Phone    string `json:"phone"`
 }
 
 // UsersInfoResponse -- ListUsersByKeyAndLimit
 type UsersInfoResponse struct {
-	Message            string
-	SingleUserInfoList []singleUserInfo
+	Message            string           `json:"message"`
+	SingleUserInfoList []singleUserInfo `json:"singleuserinfolist"`
+}
+
+type userInfo struct {
+	username string
+	password string
+	email    string
+	phone    string
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
@@ -81,6 +88,8 @@ const (
 	EmptyNewPassword = "new password is empty"
 	// NotMatchPassword .
 	NotMatchPassword = "new password and confirmation do not match"
+	// RequestDataError .
+	RequestDataError = "request data error"
 )
 
 // ────────────────────────────────────────────────────────────────────────────────

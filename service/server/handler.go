@@ -44,9 +44,7 @@ func userLogoutHandler(formatter *render.Render) http.HandlerFunc {
 // create a new user by username, password, email, password, no need key
 func createUserHandler(formatter *render.Render) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		req.ParseForm() // parsing the parameters
-		status, responseJSON := entities.AgendaService.CreateUser(
-			req.FormValue("username"), req.FormValue("password"), req.FormValue("email"), req.FormValue("phone"))
+		status, responseJSON := entities.AgendaService.CreateUser(req.Body)
 		formatter.JSON(w, status, responseJSON)
 	}
 }

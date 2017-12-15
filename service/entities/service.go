@@ -1,6 +1,8 @@
 package entities
 
 import (
+	"encoding/json"
+	"io"
 	"net/http"
 	"strconv"
 
@@ -18,16 +20,21 @@ var AgendaService = AgendaAtomicService{}
 //
 
 // CreateUser -- check if input is empty and username is duplicate
-func (*AgendaAtomicService) CreateUser(
-	username string, password string, email string, phone string) (int, UserInfoResponse) {
+func (*AgendaAtomicService) CreateUser(body io.ReadCloser) (int, UserInfoResponse) {
+	decoder := json.NewDecoder(body)
+	defer body.Close()
+	var userinfo userInfo
+	if decoder.Decode(&userinfo) != nil {
+		return http.StatusBadRequest, UserInfoResponse{Message: RequestDataError, ID: -1}
+	}
 	// ---- check input ----
-	if username == "" || password == "" || email == "" || phone == "" {
+	if userinfo.username == "" || userinfo.password == "" || userinfo.email == "" || userinfo.phone == "" {
 		return http.StatusBadRequest, UserInfoResponse{Message: EmptyInput, ID: -1}
 	}
-	password = tools.MD5Encryption(password)
+	userinfo.password = tools.MD5Encryption(userinfo.password)
 	dao := agendaDao{xormEngine}
 	// ---- check username ----
-	has, err := dao.ifUserExistByConditions(&User{UserName: username})
+	has, err := dao.ifUserExistByConditions(&User{UserName: userinfo.username})
 	if err != nil { // server error
 		return http.StatusInternalServerError, UserInfoResponse{Message: ServerError, ID: -1}
 	}
@@ -36,7 +43,7 @@ func (*AgendaAtomicService) CreateUser(
 	}
 	// ---- create user ----
 	result, user := dao.createUser(&User{SessionID: tools.GetKey(),
-		UserName: username, Password: password, Email: email, Phone: phone})
+		UserName: userinfo.username, Password: userinfo.password, Email: userinfo.email, Phone: userinfo.phone})
 	if result && user != nil { // create user successfully
 		return http.StatusCreated, UserInfoResponse{CreateUserSuceed, user.ID, user.UserName, user.Email, user.Phone}
 	}
