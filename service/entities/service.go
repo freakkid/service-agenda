@@ -23,18 +23,18 @@ var AgendaService = AgendaAtomicService{}
 func (*AgendaAtomicService) CreateUser(body io.ReadCloser) (int, UserInfoResponse) {
 	decoder := json.NewDecoder(body)
 	defer body.Close()
-	var userinfo userInfo
-	if decoder.Decode(&userinfo) != nil {
+	var userInfo UserInfo
+	if err := decoder.Decode(&userInfo); err != nil {
 		return http.StatusBadRequest, UserInfoResponse{Message: RequestDataError, ID: -1}
 	}
 	// ---- check input ----
-	if userinfo.username == "" || userinfo.password == "" || userinfo.email == "" || userinfo.phone == "" {
+	if userInfo.Username == "" || userInfo.Password == "" || userInfo.Email == "" || userInfo.Phone == "" {
 		return http.StatusBadRequest, UserInfoResponse{Message: EmptyInput, ID: -1}
 	}
-	userinfo.password = tools.MD5Encryption(userinfo.password)
+	userInfo.Password = tools.MD5Encryption(userInfo.Password)
 	dao := agendaDao{xormEngine}
 	// ---- check username ----
-	has, err := dao.ifUserExistByConditions(&User{UserName: userinfo.username})
+	has, err := dao.ifUserExistByConditions(&User{UserName: userInfo.Username})
 	if err != nil { // server error
 		return http.StatusInternalServerError, UserInfoResponse{Message: ServerError, ID: -1}
 	}
@@ -43,7 +43,7 @@ func (*AgendaAtomicService) CreateUser(body io.ReadCloser) (int, UserInfoRespons
 	}
 	// ---- create user ----
 	result, user := dao.createUser(&User{SessionID: tools.GetKey(),
-		UserName: userinfo.username, Password: userinfo.password, Email: userinfo.email, Phone: userinfo.phone})
+		UserName: userInfo.Username, Password: userInfo.Password, Email: userInfo.Email, Phone: userInfo.Phone})
 	if result && user != nil { // create user successfully
 		return http.StatusCreated, UserInfoResponse{CreateUserSuceed, user.ID, user.UserName, user.Email, user.Phone}
 	}
