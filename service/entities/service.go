@@ -189,7 +189,7 @@ func (*AgendaAtomicService) ListUsersByLimit(
 	}
 	// ---- check offset ----
 	if stringOffset == "" {
-		offset = 5
+		offset = 0
 	} else {
 		offset, err = strconv.Atoi(stringOffset)
 		if err != nil || offset < 0 { // invalid limit
