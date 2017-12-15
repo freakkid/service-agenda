@@ -1,17 +1,17 @@
 package service
 
 import (
-	"os"
-	"fmt"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
-	"errors"
+	"os"
 )
 
 func Logout() (bool, error) {
 	type RetJson struct {
-		Message	string	`json:"message"`
+		Message string `json:"message"`
 	}
 	ok, name, session := GetCurrentUser()
 	if !ok {
@@ -20,7 +20,7 @@ func Logout() (bool, error) {
 
 	url := URL + "/v1/user/logout/" + name
 	req, err := http.NewRequest("DELETE", url, nil)
-	req.Header.Set("cookie", name + "=" + session)
+	req.Header.Set("cookie", name+"="+session)
 	if err != nil {
 		return false, errors.New("Can not construct DELETE request.")
 	}
@@ -32,7 +32,7 @@ func Logout() (bool, error) {
 	defer res.Body.Close()
 	if res.StatusCode == 204 {
 		return true, nil
-	} else if res.StatusCode < 500 && res.StatusCode >= 400{
+	} else if res.StatusCode < 500 && res.StatusCode >= 400 {
 		body, err := ioutil.ReadAll(res.Body)
 		if err != nil {
 			return false, errors.New("Fail to read body.")
