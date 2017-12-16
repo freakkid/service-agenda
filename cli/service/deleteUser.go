@@ -19,7 +19,7 @@ func DeleteUser(password string) (bool, error) {
 	}
 	url := URL + "/v1/users/" + name + "?password=" + password
 	req, err := http.NewRequest("DELETE", url, nil)
-	req.Header.Set("cookie", name+"="+session)
+	req.Header.Set("Cookie", "key="+session)
 	if err != nil {
 		return false, errors.New("Can not construct DELETE request.")
 	}

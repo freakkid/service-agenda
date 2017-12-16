@@ -42,7 +42,7 @@ func GetUserKey(username string, password string) bool {
 		} else {
 			session := ""
 			for _, item := range resp.Cookies() {
-				if item.Name == username {
+				if item.Name == "key" {
 					session = item.Value
 				}
 			}
