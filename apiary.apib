@@ -15,16 +15,22 @@ Resource operations related to a user in the API.
 get a security key for operations later
     
 ### User Login in [GET /v1/user/login{?username,password}]
-
+    
 + Parameters
     - username : `user1` (string, required)
     - password : `pass1` (string, required)
 
 + Response 200 (application/json)
 
-        {
-            "message": "get key successfully"
-        }
+    + Headers
+        
+            Set-Cookie: key=3w4e5r6tyuifcgvhbjnkmlvg
+    
+    + Body
+    
+            {
+                "message": "get key successfully"
+            }
 
 
 + Response 400 (application/json)
@@ -56,9 +62,15 @@ Resources related to users in the API.
 
 ### List all Users [GET /v1/users{?limit,offset}]
 
-+ Parameters
-    - limit : 2 (optional,int) - Defalut 5
-    - offset : 1 (optional,int) - Defalut 0
++ Request 
+
+    + Headers
+        
+            Cookie: key=3w4e5r6tyuifcgvhbjnkmlvg
+        
+    + Parameters
+        - limit : 2 (optional,int) - Defalut 5
+        - offset : 1 (optional,int) - Defalut 0
 
 + Response 200 (application/json)
 
@@ -111,6 +123,7 @@ Resources related to users in the API.
         {
             "username":"zhang3",
             "phone":"12345678901",
+            "password":"drfghjkfghjk",
             "email":"zhang3@mail2.sysu.edu.cn",
         }
 
@@ -119,9 +132,9 @@ Resources related to users in the API.
         {
             "message": "create user successfully",
             "id" : -1,
-            "username":"",
-            "phone":"",
-            "email":""
+            "username":"zhang3",
+            "phone":"12345678901",
+            "email":"zhang3@mail2.sysu.edu.cn",
         }
             
 + Response 400 (application/json)
@@ -147,8 +160,14 @@ Resources related to users in the API.
 
 ### Get User by ID [GET /v1/users/{id}]
 
-+ Parameters
-    - id : `1` (int, required) 
++ Request 
+
+    + Headers
+        
+            Cookie: key=3w4e5r6tyuifcgvhbjnkmlvg
+        
+    + Parameters
+        - id : `1` (int, required) 
 
 + Response 200 (application/json)
 
@@ -202,10 +221,15 @@ Resources related to users in the API.
 
 ### Delete a User [DELETE /v1/users/{id}{?password}]
 
++ Request 
 
-+ Parameters
-    - id : 1 (int, required)
-    - password : `pass` (string, required)
+    + Headers
+        
+            Cookie: key=3w4e5r6tyuifcgvhbjnkmlvg
+    
+    + Parameters
+        - id : 1 (int, required)
+        - password : `pass` (string, required)
 
 + Response 204 
 
@@ -228,12 +252,17 @@ Resources related to users in the API.
         }
 
 ### Update Password [PATCH /v1/users/{id}/{?password,newpassword,confirmation}]
++ Request 
 
-+ Parameters
-    - id : 1 (int, required) - user id
-    - password : `dfgh1` (string, required) - old password
-    - newpassword : `fguhi1` (string, required) - new password
-    - confirmation : `fguhi1` (string, required) - new password comfirmation
+    + Headers
+        
+            Cookie : key=3w4e5r6tyuifcgvhbjnkmlvg
+            
+    + Parameters
+        - id : 1 (int, required) - user id
+        - password : `dfgh1` (string, required) - old password
+        - newpassword : `fguhi1` (string, required) - new password
+        - confirmation : `fguhi1` (string, required) - new password comfirmation
 
 + Response 200 (application/json)
 
@@ -263,9 +292,14 @@ Resources related to users in the API.
 
 ### User Logout [DELETE /v1/user/logout/{id}]
 
++ Request
 
-+ Parameters
-    - id : 1 (int, required)
+    + Headers
+        
+            Cookie: key=3w4e5r6tyuifcgvhbjnkmlvg
+    
+    + Parameters
+        - id : 1 (int, required)
 
 + Response 204 
 
