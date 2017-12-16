@@ -30,6 +30,9 @@ func ListAllUsers(limit string, offset string) (bool, []SingleUserInfo) {
 		return false, []SingleUserInfo{}
 	}
 	defer resp.Body.Close()
+	return ListRes(resp)
+}
+func ListRes(resp *http.Response) (bool, []SingleUserInfo) {
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "error : some mistakes happend in forming body")

@@ -10,9 +10,6 @@ import (
 )
 
 func UpdatePassword(old, new, confirm string) (bool, error) {
-	type RetJson struct {
-		Message string `json:"message"`
-	}
 	ok, name, session := GetCurrentUser()
 	if !ok {
 		return false, errors.New("Some mistakes happend in FindUser")
@@ -27,8 +24,14 @@ func UpdatePassword(old, new, confirm string) (bool, error) {
 	if err != nil {
 		return false, errors.New("Send patch request failed.")
 	}
-
 	defer res.Body.Close()
+	return UpdateRes(res)
+}
+
+func UpdateRes(res *http.Response) (bool, error) {
+	type RetJson struct {
+		Message string `json:"message"`
+	}
 	if res.StatusCode == 200 {
 		return true, nil
 	} else if res.StatusCode < 500 && res.StatusCode >= 400 {

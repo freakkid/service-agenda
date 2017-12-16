@@ -9,11 +9,11 @@ import (
 )
 
 func GetUserKey(username string, password string) bool {
+	var times int
 	type RetJson struct {
 		ID      string `json:"id"`
 		Message string `json:"message"`
 	}
-	var times int
 	for {
 		tarUrl := URL + "/v1/user/login?username=" + username + "&password=" + password
 		resp, err := http.Get(tarUrl)
