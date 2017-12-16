@@ -39,6 +39,7 @@ var ucreateCmd = &cobra.Command{
 		var prePassword string
 		times := 1
 		reader := bufio.NewReader(os.Stdin)
+
 		for {
 			if times == 1 {
 				fmt.Print("Please enter the password you want to create: ")
@@ -67,10 +68,9 @@ var ucreateCmd = &cobra.Command{
 		ok, message = tools.ValidatePass(createPassword)
 		tools.DealMessage(ok, message)
 		// send create request
-		ok = service.CreateUser(createUsername, createPassword, createPhone, createEmail)
+		ok, message = service.CreateUser(createUsername, createPassword, createPhone, createEmail)
 		tools.DealMessage(ok, message)
-
-		fmt.Println("Sucess : Register ", createUsername)
+		fmt.Println(message)
 	},
 }
 

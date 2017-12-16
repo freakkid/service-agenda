@@ -37,7 +37,7 @@ func FindUser(id string) (bool, SingleUserInfo) {
 		fmt.Fprintln(os.Stderr, "error : some mistakes happend in creating request to server")
 		return false, SingleUserInfo{}
 	}
-	req.Header.Set("Cookie", username+"="+session)
+	req.Header.Set("Cookie", "key="+session)
 	fmt.Println(username + "=" + session)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -45,6 +45,10 @@ func FindUser(id string) (bool, SingleUserInfo) {
 		return false, SingleUserInfo{}
 	}
 	defer resp.Body.Close()
+	return FindRes(resp)
+}
+
+func FindRes(resp *http.Response) (bool, SingleUserInfo) {
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "error : Some mistakes happend in forming body")

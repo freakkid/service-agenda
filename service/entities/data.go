@@ -18,6 +18,12 @@ type SingleMessageResponse struct {
 	Message string `json:"message"`
 }
 
+// LoginResponse .
+type LoginResponse struct {
+	Message string `json:"message"`
+	ID      int    `json:"id"`
+}
+
 // used in UsersInfoResponse
 type singleUserInfo struct {
 	ID       int    `json:"id"`

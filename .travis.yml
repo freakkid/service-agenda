@@ -5,10 +5,12 @@ go:
 
 
 script:
-    # - go test ./cli/service/
-    - go build ./service/main.go 
+    - go build ./service/main.go
+    - go build ./cli/main.go
+    # - go test ./cli/service
     - go test ./service/entities
+    
+    
+    
 
 
-# after_script:
-#     - rm ./service/entities/agenda.db

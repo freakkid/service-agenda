@@ -22,7 +22,7 @@ func ListAllUsers(limit string, offset string) (bool, []SingleUserInfo) {
 		fmt.Fprintln(os.Stderr, "error : some mistakes happend in creating request to server")
 		return false, []SingleUserInfo{}
 	}
-	req.Header.Set("Cookie", username+"="+session)
+	req.Header.Set("Cookie", "key="+session)
 	fmt.Println(username + "=" + session)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -30,6 +30,9 @@ func ListAllUsers(limit string, offset string) (bool, []SingleUserInfo) {
 		return false, []SingleUserInfo{}
 	}
 	defer resp.Body.Close()
+	return ListRes(resp)
+}
+func ListRes(resp *http.Response) (bool, []SingleUserInfo) {
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "error : some mistakes happend in forming body")

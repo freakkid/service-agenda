@@ -8,8 +8,14 @@ import (
 	"os"
 )
 
+//GetUserKey .
 func GetUserKey(username string, password string) bool {
 	var times int
+	// RetJson .
+	type RetJson struct {
+		ID      string `json:"id"`
+		Message string `json:"message"`
+	}
 	for {
 		tarUrl := URL + "/v1/user/login?username=" + username + "&password=" + password
 		resp, err := http.Get(tarUrl)
@@ -23,7 +29,7 @@ func GetUserKey(username string, password string) bool {
 			fmt.Fprintln(os.Stderr, "error ： Some mistakes happend in forming body")
 			return false
 		}
-		temp := SingleMessageResponse{}
+		temp := RetJson{}
 		if err = json.Unmarshal(body, &temp); err != nil {
 			fmt.Fprintln(os.Stderr, "error: some mistakes happend in parsing body")
 			return false
@@ -42,7 +48,7 @@ func GetUserKey(username string, password string) bool {
 		} else {
 			session := ""
 			for _, item := range resp.Cookies() {
-				if item.Name == username {
+				if item.Name == "key" {
 					session = item.Value
 				}
 			}
@@ -52,7 +58,7 @@ func GetUserKey(username string, password string) bool {
 			}
 			fmt.Println("Geted session : " + session)
 			// write to file -- user
-			err = ioutil.WriteFile(UserFile, []byte(username), 0655)
+			err = ioutil.WriteFile(UserFile, []byte(temp.ID), 0655)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, "Some mistakes happend in writing to current user")
 			}

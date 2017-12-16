@@ -12,8 +12,7 @@ func TestGetUserKey(t *testing.T) {
 		args args
 		want bool
 	}{
-		{"wrong password", args {"root", ""}, false},
-		{"wrong username", args {"", "pass"}, false},
+	// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

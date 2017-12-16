@@ -48,3 +48,9 @@ func Username2Id(username string) (bool, string) {
 	}
 	return false, ""
 }
+
+func RemoveFile() {
+	os.Remove(UserMap)
+	os.Remove(UserFile)
+	os.Remove(SessionFile)
+}

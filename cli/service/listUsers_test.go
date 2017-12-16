@@ -1,27 +1,57 @@
 package service
 
 import (
+	"net/http"
+	"reflect"
 	"testing"
 )
 
 func TestListAllUsers(t *testing.T) {
 	type args struct {
-		limit string
+		limit  string
+		offset string
 	}
 	tests := []struct {
-		name string
-		args args
-		want []RetJson
+		name  string
+		args  args
+		want  bool
+		want1 []SingleUserInfo
 	}{
-		{"normal", args {"5"}, []RetJson{}},
-		{"wrong limit1", args {"-1"}, []RetJson{}},
-		{"wrong limit2", args {"2"}, []RetJson{}},
+	// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := ListAllUsers(tt.args.limit)
-			if len(got) > 5 {
-				t.Errorf("ListUsers() want at most %v, but get %v", tt.args.limit, len(got))
+			got, got1 := ListAllUsers(tt.args.limit, tt.args.offset)
+			if got != tt.want {
+				t.Errorf("ListAllUsers() got = %v, want %v", got, tt.want)
+			}
+			if !reflect.DeepEqual(got1, tt.want1) {
+				t.Errorf("ListAllUsers() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}
+
+func TestListRes(t *testing.T) {
+	type args struct {
+		resp *http.Response
+	}
+	tests := []struct {
+		name  string
+		args  args
+		want  bool
+		want1 []SingleUserInfo
+	}{
+	// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, got1 := ListRes(tt.args.resp)
+			if got != tt.want {
+				t.Errorf("ListRes() got = %v, want %v", got, tt.want)
+			}
+			if !reflect.DeepEqual(got1, tt.want1) {
+				t.Errorf("ListRes() got1 = %v, want %v", got1, tt.want1)
 			}
 		})
 	}
