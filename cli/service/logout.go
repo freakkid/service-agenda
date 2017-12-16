@@ -31,6 +31,7 @@ func Logout() (bool, error) {
 
 	defer res.Body.Close()
 	if res.StatusCode == 204 {
+		RemoveFile()
 		return true, nil
 	} else if res.StatusCode < 500 && res.StatusCode >= 400 {
 		body, err := ioutil.ReadAll(res.Body)

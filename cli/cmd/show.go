@@ -58,6 +58,6 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// showCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	ushowCmd.Flags().StringP("limit", "l", "2", "limit length of the result")
-	ushowCmd.Flags().StringP("offset", "o", "1", "offset to the result")
+	ushowCmd.Flags().StringP("limit", "l", "5", "limit length of the result")
+	ushowCmd.Flags().StringP("offset", "o", "0", "offset to the result")
 }
