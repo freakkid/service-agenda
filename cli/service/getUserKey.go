@@ -8,8 +8,10 @@ import (
 	"os"
 )
 
+//GetUserKey .
 func GetUserKey(username string, password string) bool {
 	var times int
+	// RetJson .
 	type RetJson struct {
 		ID      string `json:"id"`
 		Message string `json:"message"`

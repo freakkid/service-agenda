@@ -54,19 +54,20 @@ func (*AgendaAtomicService) CreateUser(body io.ReadCloser) (int, UserInfoRespons
 // if user no exists or occur error, return empty sessionID
 // if login success, return sessionID
 func (*AgendaAtomicService) LoginAndGetSessionID(
-	username string, password string) (string, int, SingleMessageResponse) {
+	username string, password string) (string, int, LoginResponse) {
 	// ---- check username and password ----
 	if username == "" || password == "" { // check if empty username and password
-		return "", http.StatusBadRequest, SingleMessageResponse{EmptyUsernameOrPassword}
+		return "", http.StatusBadRequest, LoginResponse{EmptyUsernameOrPassword, -1}
 	}
 	password = tools.MD5Encryption(password)
 	dao := agendaDao{xormEngine}
-	has, err := dao.ifUserExistByConditions(&User{UserName: username, Password: password}) // check if exist
-	if err != nil {                                                                        // server error
-		return "", http.StatusInternalServerError, SingleMessageResponse{ServerError}
+	user := User{UserName: username, Password: password}
+	has, err := dao.ifUserExistByConditions(&user) // check if exist
+	if err != nil {                                // server error
+		return "", http.StatusInternalServerError, LoginResponse{ServerError, -1}
 	}
 	if !has { // user not exist
-		return "", http.StatusUnauthorized, SingleMessageResponse{IncorrectUsernameAndPassword}
+		return "", http.StatusUnauthorized, LoginResponse{IncorrectUsernameAndPassword, -1}
 	}
 	// ---- get new sessionID ----
 	var sessionID = tools.GenenrateSessionID() // generate new sessionID
@@ -78,9 +79,9 @@ func (*AgendaAtomicService) LoginAndGetSessionID(
 	}
 	affected, _ := dao.updateUser(&User{SessionID: sessionID}, &User{UserName: username, Password: password})
 	if affected == 0 { // user not exist
-		return "", http.StatusUnauthorized, SingleMessageResponse{IncorrectUsernameAndPassword}
+		return "", http.StatusUnauthorized, LoginResponse{IncorrectUsernameAndPassword, -1}
 	}
-	return sessionID, http.StatusOK, SingleMessageResponse{LoginSucceed}
+	return sessionID, http.StatusOK, LoginResponse{LoginSucceed, user.ID}
 }
 
 // GetUserInfoByID --- check if sessionID is valid and id exsits and belong to the same user
