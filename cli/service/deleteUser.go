@@ -10,9 +10,6 @@ import (
 )
 
 func DeleteUser(password string) (bool, error) {
-	type RetJson struct {
-		Message string `json:"message"`
-	}
 	ok, name, session := GetCurrentUser()
 	if !ok {
 		return false, errors.New("Some mistakes happend in FindUser")
@@ -29,6 +26,13 @@ func DeleteUser(password string) (bool, error) {
 	}
 
 	defer res.Body.Close()
+	return DeleteRes(res)
+}
+
+func DeleteRes(res *http.Response) (bool, error) {
+	type RetJson struct {
+		Message string `json:"message"`
+	}
 	if res.StatusCode == 204 {
 		RemoveFile()
 		return true, nil

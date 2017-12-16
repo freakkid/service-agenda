@@ -45,6 +45,10 @@ func FindUser(id string) (bool, SingleUserInfo) {
 		return false, SingleUserInfo{}
 	}
 	defer resp.Body.Close()
+	return FindRes(resp)
+}
+
+func FindRes(resp *http.Response) (bool, SingleUserInfo) {
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "error : Some mistakes happend in forming body")

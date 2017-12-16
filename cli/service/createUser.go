@@ -19,6 +19,10 @@ func CreateUser(createUsername string, createPassword string, createPhone string
 		return false
 	}
 	defer resp.Body.Close()
+	return CreateRes(resp)
+}
+
+func CreateRes(resp *http.Response) bool {
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "error : Some mistakes happend in reading resp.Body")
