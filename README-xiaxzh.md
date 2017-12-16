@@ -1,6 +1,6 @@
 # 个人总结---Service-Agenda
 
-### [夏显茁](https://github.com/xiaxzh)
+### [夏显茁](https://github.com/xiaxzh) xiaxzh@outlook.com
 
 * Student ID: 15331322
 
