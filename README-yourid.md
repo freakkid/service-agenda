@@ -16,7 +16,9 @@
 
     + Add .travis.yml
 
-    + Add LICENSE 
+    + Add LICENSE and take part in the USAGE writing of README.md
+
+    + take part in the testing of client and server code
 
 * About my work
 
