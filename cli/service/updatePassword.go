@@ -2,48 +2,43 @@ package service
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
-	"os"
 )
 
-func UpdatePassword(old, new, confirm string) (bool, error) {
+//UpdatePassword .
+func UpdatePassword(old, new, confirm string) (bool, string) {
 	ok, name, session := GetCurrentUser()
 	if !ok {
-		return false, errors.New("Some mistakes happend in FindUser")
+		return false, "No login user"
 	}
 	url := URL + "/v1/users/" + name + "?password=" + old + "&newpassword=" + new + "&confirmation=" + confirm
 	req, err := http.NewRequest("PATCH", url, nil)
 	req.Header.Set("Cookie", "key="+session)
 	if err != nil {
-		return false, errors.New("Can not construct PATCH request.")
+		return false, "Can not construct PATCH request."
 	}
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return false, errors.New("Send patch request failed.")
+		return false, "Send patch request failed."
 	}
 	defer res.Body.Close()
-	return UpdateRes(res)
+	return UpdateRes(res.Body, res.StatusCode)
 }
 
-func UpdateRes(res *http.Response) (bool, error) {
-	type RetJson struct {
-		Message string `json:"message"`
+//UpdateRes .
+func UpdateRes(resBody io.ReadCloser, statusCode int) (bool, string) {
+	body, err := ioutil.ReadAll(resBody)
+	if err != nil {
+		return false, "Fail to read body."
 	}
-	if res.StatusCode == 200 {
-		return true, nil
-	} else if res.StatusCode < 500 && res.StatusCode >= 400 {
-		body, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			return false, errors.New("Fail to read body.")
-		}
-		tmp := RetJson{}
-		if err := json.Unmarshal(body, &tmp); err != nil {
-			fmt.Fprintln(os.Stderr, "Can not resolve body.")
-		}
-		return false, errors.New(tmp.Message)
+	tmp := MessageJSON{}
+	if err := json.Unmarshal(body, &tmp); err != nil {
+		return false, "Can not resolve body."
 	}
-	return false, errors.New("Server failed.")
+	if statusCode == 200 {
+		return true, tmp.Message
+	}
+	return false, tmp.Message
 }

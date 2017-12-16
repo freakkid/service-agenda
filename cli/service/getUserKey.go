@@ -8,11 +8,6 @@ import (
 	"strconv"
 )
 
-// RetJSON .
-type RetJSON struct {
-	ID      int    `json:"id"`
-	Message string `json:"message"`
-}
 
 // GetUserKey .
 func GetUserKey(username string, password string) (bool, string) {
@@ -37,7 +32,7 @@ func GetUserKeyRes(sessionID string, resBody io.ReadCloser, statusCode int) (boo
 	if err != nil {
 		return false, "error : Some mistakes happend in reading body"
 	}
-	temp := RetJSON{}
+	temp := LoginRetJSON{}
 	if err = json.Unmarshal(body, &temp); err != nil {
 		return false, "error : Some mistakes happend in parsing body"
 	}

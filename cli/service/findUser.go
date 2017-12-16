@@ -2,70 +2,45 @@ package service
 
 import (
 	"encoding/json"
-	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"strings"
 )
 
-type RetJson struct {
-	Id       int    `json:"id"`
-	Username string `json:"username"`
-	Phone    string `json:"phone"`
-	Email    string `json:"email"`
-}
-
-type User struct {
-	Id       int    `json:"id"`
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Phone    string `json:"phone"`
-	Email    string `json:"email"`
-}
-
-func FindUser(id string) (bool, SingleUserInfo) {
-	ok, username, session := GetCurrentUser()
+// FindUser .
+func FindUser(id string) (bool, string, SingleUserInfo) {
+	ok, _, session := GetCurrentUser()
 	if !ok {
-		fmt.Fprintln(os.Stderr, "Some mistakes happend in FindUser")
-		return false, SingleUserInfo{}
+		return false, "No login user", SingleUserInfo{}
 	}
-	tarUrl := URL + "/v1/users/?id=" + session + "&id=" + id
-	req, err := http.NewRequest("GET", tarUrl, strings.NewReader(""))
-	// resp, err := http.Get(URL + "/v1/users?limit=" + limit + "&offset=" + offset)
+	tarURL := URL + "/v1/users/" + id
+	req, err := http.NewRequest("GET", tarURL, strings.NewReader(""))
+
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "error : some mistakes happend in creating request to server")
-		return false, SingleUserInfo{}
+		return false, "error : some mistakes happend in creating request to server", SingleUserInfo{}
 	}
 	req.Header.Set("Cookie", "key="+session)
-	fmt.Println(username + "=" + session)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "error : some mistakes happend in sending request to server")
-		return false, SingleUserInfo{}
+		return false, "error : some mistakes happend in sending request to server", SingleUserInfo{}
 	}
 	defer resp.Body.Close()
-	return FindRes(resp)
+	return FindRes(resp.Body, resp.StatusCode)
 }
 
-func FindRes(resp *http.Response) (bool, SingleUserInfo) {
-	body, err := ioutil.ReadAll(resp.Body)
+// FindRes .
+func FindRes(respBody io.ReadCloser, statusCode int) (bool, string, SingleUserInfo) {
+	body, err := ioutil.ReadAll(respBody)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "error : Some mistakes happend in forming body")
+		return false, "error : Some mistakes happend in forming body", SingleUserInfo{}
 	}
-	// fmt.Println(string(body))
-	if resp.StatusCode == 200 {
-		temp := UserKeyResponse{}
-		if err := json.Unmarshal(body, &temp); err != nil {
-			fmt.Fprintln(os.Stderr, "error : Some mistakes happend in parsing body")
-		}
-		return true, SingleUserInfo{temp.ID, temp.UserName, temp.Email, temp.Phone}
-	} else {
-		temp := UserKeyResponse{}
-		if err := json.Unmarshal(body, &temp); err != nil {
-			fmt.Fprintln(os.Stderr, "error : Some mistakes happend in parsing body")
-		}
-		fmt.Fprintln(os.Stderr, temp.Message)
-		return false, SingleUserInfo{}
+	temp := UserKeyResponse{}
+	if err := json.Unmarshal(body, &temp); err != nil {
+		return false, "error : Some mistakes happend in parsing body", SingleUserInfo{}
 	}
+	if statusCode == 200 {
+		return true, temp.Message, SingleUserInfo{temp.ID, temp.UserName, temp.Email, temp.Phone}
+	}
+	return false, temp.Message, SingleUserInfo{}
 }

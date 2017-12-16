@@ -4,10 +4,40 @@ import (
 	"os"
 )
 
+//UserFile .
 var UserFile string
+
+//SessionFile .
 var SessionFile string
+
+// UserMap .
 var UserMap string
+
+// URL .
 var URL string
+
+// LoginRetJSON .
+type LoginRetJSON struct {
+	ID      int    `json:"id"`
+	Message string `json:"message"`
+}
+
+// FindUserRetJSON .
+type FindUserRetJSON struct {
+	ID       int    `json:"id"`
+	Username string `json:"username"`
+	Phone    string `json:"phone"`
+	Email    string `json:"email"`
+}
+
+// User .
+type User struct {
+	ID       int    `json:"id"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Phone    string `json:"phone"`
+	Email    string `json:"email"`
+}
 
 // UserKeyResponse -- GetUserByKeyAndID
 type UserKeyResponse struct {
@@ -23,7 +53,7 @@ type SingleMessageResponse struct {
 	Message string
 }
 
-// used in UsersInfoResponse
+// SingleUserInfo .
 type SingleUserInfo struct {
 	ID       int
 	UserName string
@@ -46,8 +76,9 @@ type CreateUserResponse struct {
 	Phone    string
 }
 
-type MessageJson struct {
-	Message string
+//MessageJSON .
+type MessageJSON struct {
+	Message string `json:"message"`
 }
 
 func init() {
@@ -57,7 +88,6 @@ func init() {
 	envURL := os.Getenv("SERVER_URL")
 	PORT := os.Getenv("PORT")
 	if len(envURL) == 0 {
-		// URL = "https://private-633936-serviceagenda.apiary-mock.com"
 		URL = "http://localhost:8080"
 	} else {
 		URL = envURL + PORT

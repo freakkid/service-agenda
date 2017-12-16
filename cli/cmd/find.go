@@ -16,7 +16,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	service "github.com/freakkid/service-agenda/cli/service"
 	tools "github.com/freakkid/service-agenda/cli/tools"
@@ -30,18 +29,14 @@ var findCmd = &cobra.Command{
 	Long:  `Use this command to find user by id.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		id, _ := cmd.Flags().GetString("id")
-
 		// validate
 		ok, message := tools.ValidateId(id)
 		tools.DealMessage(ok, message)
-
-		ok, retJson := service.FindUser(id)
-		if !ok {
-			fmt.Println("Nothing to display.")
-			os.Exit(1)
-		}
+		var retJSON service.SingleUserInfo
+		ok, message, retJSON = service.FindUser(id)
+		tools.DealMessage(ok, message)
 		fmt.Printf("%-5s%-15s%-25s%-25s\n", "Id", "Username", "Phone number", "E-mail")
-		fmt.Printf("%-5d%-15s%-25s%-25s\n", retJson.ID, retJson.UserName, retJson.Phone, retJson.Email)
+		fmt.Printf("%-5d%-15s%-25s%-25s\n", retJSON.ID, retJSON.UserName, retJSON.Phone, retJSON.Email)
 	},
 }
 
