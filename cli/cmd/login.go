@@ -44,12 +44,9 @@ var loginCmd = &cobra.Command{
 		ok, message = tools.ValidatePass(password)
 		tools.DealMessage(ok, message)
 		// send login request
-		ok = service.GetUserKey(username, password)
-		if !ok {
-			fmt.Fprintln(os.Stderr, "Some mistakes happend in login.go")
-			os.Exit(1)
-		}
-		fmt.Println("Succed login as ", username)
+		ok, message = service.GetUserKey(username, password)
+		tools.DealMessage(ok, message)
+		fmt.Println(message)
 	},
 }
 

@@ -2,74 +2,60 @@ package service
 
 import (
 	"encoding/json"
-	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
-	"os"
 )
 
-//GetUserKey .
-func GetUserKey(username string, password string) bool {
-	var times int
-	// RetJson .
-	type RetJson struct {
-		ID      string `json:"id"`
-		Message string `json:"message"`
+// RetJSON .
+type RetJSON struct {
+	ID      string `json:"id"`
+	Message string `json:"message"`
+}
+
+// GetUserKey .
+func GetUserKey(username string, password string) (bool, string) {
+	tarURL := URL + "/v1/user/login?username=" + username + "&password=" + password
+	resp, err := http.Get(tarURL)
+	if err != nil {
+		return false, "error : Some mistakes happend in sending get request to tarUrl"
 	}
-	for {
-		tarUrl := URL + "/v1/user/login?username=" + username + "&password=" + password
-		resp, err := http.Get(tarUrl)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, "error : Some mistakes happend in sending get request to tarUrl")
-			return false
-		}
-		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, "error ： Some mistakes happend in forming body")
-			return false
-		}
-		temp := RetJson{}
-		if err = json.Unmarshal(body, &temp); err != nil {
-			fmt.Fprintln(os.Stderr, "error: some mistakes happend in parsing body")
-			return false
-		}
-		// fmt.Println(string(body))
-		if resp.StatusCode != 200 {
-			fmt.Println(temp.Message)
-			if times < 2 {
-				times++
-				fmt.Print("Wrong password, Please try again: ")
-				fmt.Scanf("%s", &password)
-			} else {
-				fmt.Fprintln(os.Stderr, "error : Wrong password")
-				return false
-			}
-		} else {
-			session := ""
-			for _, item := range resp.Cookies() {
-				if item.Name == "key" {
-					session = item.Value
-				}
-			}
-			if session == "" {
-				fmt.Fprintln(os.Stderr, "error : session should not be empty")
-				return false
-			}
-			fmt.Println("Geted session : " + session)
-			// write to file -- user
-			err = ioutil.WriteFile(UserFile, []byte(temp.ID), 0655)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, "Some mistakes happend in writing to current user")
-			}
-			// write to file -- session
-			err = ioutil.WriteFile(SessionFile, []byte(session), 0655)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, "Some mistakes happend in writing to session")
-				return false
-			}
-			break
+	defer resp.Body.Close()
+	sessionID := ""
+	for _, item := range resp.Cookies() {
+		if item.Name == "key" {
+			sessionID = item.Value
 		}
 	}
-	return true
+	return GetUserKeyRes(sessionID, resp.Body, resp.StatusCode)
+}
+
+// GetUserKeyRes .
+func GetUserKeyRes(sessionID string, resBody io.ReadCloser, statusCode int) (bool, string) {
+	body, err := ioutil.ReadAll(resBody)
+	if err != nil {
+		return false, "error : Some mistakes happend in reading body"
+	}
+	temp := RetJSON{}
+	if err = json.Unmarshal(body, &temp); err != nil {
+		return false, "error : Some mistakes happend in parsing body"
+	}
+	if statusCode == http.StatusCreated {
+
+		if sessionID == "" {
+			return false, "error : sessionID should not be empty"
+		}
+		// write to file -- user
+		err = ioutil.WriteFile(UserFile, []byte(temp.ID), 0655)
+		if err != nil {
+			return false, "Some mistakes happend in writing to current user"
+		}
+		// write to file -- sessionID
+		err = ioutil.WriteFile(SessionFile, []byte(sessionID), 0655)
+		if err != nil {
+			return false, "Some mistakes happend in writing to sessionID"
+		}
+		return true, temp.Message
+	}
+	return false, temp.Message
 }
