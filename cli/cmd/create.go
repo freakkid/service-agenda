@@ -71,6 +71,7 @@ var ucreateCmd = &cobra.Command{
 		ok, message = service.CreateUser(createUsername, createPassword, createPhone, createEmail)
 		tools.DealMessage(ok, message)
 		fmt.Println(message)
+
 	},
 }
 

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 )
@@ -17,12 +18,12 @@ func CreateUser(createUsername string, createPassword string, createPhone string
 		return false, err.Error()
 	}
 	defer resp.Body.Close()
-	return CreateRes(resp)
+	return CreateRes(resp.Body, resp.StatusCode)
 }
 
 // CreateRes .
-func CreateRes(resp *http.Response) (bool, string) {
-	body, err := ioutil.ReadAll(resp.Body)
+func CreateRes(resBody io.ReadCloser, statusCode int) (bool, string) {
+	body, err := ioutil.ReadAll(resBody)
 	if err != nil {
 		return false, "error : Some mistakes happend in reading resp.Body"
 	}
@@ -31,5 +32,5 @@ func CreateRes(resp *http.Response) (bool, string) {
 	if err = json.Unmarshal(body, &temp); err != nil {
 		return false, "error : Some mistakes happend in parsing resp.Body"
 	}
-	return resp.StatusCode == http.StatusCreated, temp.Message
+	return statusCode == http.StatusCreated, temp.Message
 }
