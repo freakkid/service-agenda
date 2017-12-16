@@ -8,3 +8,5 @@ agenda
 npm-debug.log
 .vscode
 *userMap
+*currentUser
+*session
