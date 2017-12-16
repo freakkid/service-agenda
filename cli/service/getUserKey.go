@@ -5,11 +5,12 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 )
 
 // RetJSON .
 type RetJSON struct {
-	ID      string `json:"id"`
+	ID      int    `json:"id"`
 	Message string `json:"message"`
 }
 
@@ -40,13 +41,13 @@ func GetUserKeyRes(sessionID string, resBody io.ReadCloser, statusCode int) (boo
 	if err = json.Unmarshal(body, &temp); err != nil {
 		return false, "error : Some mistakes happend in parsing body"
 	}
-	if statusCode == http.StatusCreated {
+	if statusCode == http.StatusOK {
 
 		if sessionID == "" {
 			return false, "error : sessionID should not be empty"
 		}
 		// write to file -- user
-		err = ioutil.WriteFile(UserFile, []byte(temp.ID), 0655)
+		err = ioutil.WriteFile(UserFile, []byte(strconv.Itoa(temp.ID)), 0655)
 		if err != nil {
 			return false, "Some mistakes happend in writing to current user"
 		}

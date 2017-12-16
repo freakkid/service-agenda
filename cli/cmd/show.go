@@ -37,7 +37,8 @@ var ushowCmd = &cobra.Command{
 		ok, message = tools.ValidateOffset(offset)
 		tools.DealMessage(ok, message)
 		var Item []service.SingleUserInfo
-		_, Item = service.ListAllUsers(limit, offset)
+		ok, message, Item = service.ListAllUsers(limit, offset)
+		tools.DealMessage(ok, message)
 		fmt.Printf("%-5s%-15s%-25s%-25s\n", "Id", "Username", "Phone number", "E-mail")
 		for _, user := range Item {
 			fmt.Printf("%-5d%-15s%-25s%-25s\n", user.ID, user.UserName, user.Phone, user.Email)

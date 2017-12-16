@@ -51,9 +51,9 @@ type MessageJson struct {
 }
 
 func init() {
-	UserFile = "./currentUser"
-	SessionFile = "./session"
-	UserMap = "./userMap"
+	UserFile = "../currentUser"
+	SessionFile = "../session"
+	// UserMap = "./userMap"
 	envURL := os.Getenv("SERVER_URL")
 	PORT := os.Getenv("PORT")
 	if len(envURL) == 0 {

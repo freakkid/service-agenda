@@ -2,50 +2,44 @@ package service
 
 import (
 	"encoding/json"
-	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"strings"
 )
 
-func ListAllUsers(limit string, offset string) (bool, []SingleUserInfo) {
+// ListAllUsers .
+func ListAllUsers(limit string, offset string) (bool, string, []SingleUserInfo) {
 	// list all user via http request
-	ok, username, session := GetCurrentUser()
+	ok, _, session := GetCurrentUser()
 	if !ok {
-		fmt.Fprintln(os.Stderr, "Some mistakes happend in ListAllUsers")
-		return false, []SingleUserInfo{}
+		return false, "Some mistakes happend in ListAllUsers", []SingleUserInfo{}
 	}
 	req, err := http.NewRequest("GET", URL+"/v1/users?limit="+limit+"&offset="+offset, strings.NewReader(""))
-	// resp, err := http.Get(URL + "/v1/users?limit=" + limit + "&offset=" + offset)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "error : some mistakes happend in creating request to server")
-		return false, []SingleUserInfo{}
+		return false, "error : some mistakes happend in creating request to server", []SingleUserInfo{}
 	}
 	req.Header.Set("Cookie", "key="+session)
-	fmt.Println(username + "=" + session)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "error : some mistakes happend in sending request to server")
-		return false, []SingleUserInfo{}
+		return false, "error : some mistakes happend in sending request to server", []SingleUserInfo{}
 	}
 	defer resp.Body.Close()
-	return ListRes(resp)
+	return ListRes(resp.Body, resp.StatusCode)
 }
-func ListRes(resp *http.Response) (bool, []SingleUserInfo) {
-	body, err := ioutil.ReadAll(resp.Body)
+
+// ListRes .
+func ListRes(resBody io.ReadCloser, statusCode int) (bool, string, []SingleUserInfo) {
+	body, err := ioutil.ReadAll(resBody)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "error : some mistakes happend in forming body")
-		return false, []SingleUserInfo{}
+		return false, "error : some mistakes happend in forming body", []SingleUserInfo{}
 	}
 	temp := UsersInfoResponse{}
 	if err := json.Unmarshal(body, &temp); err != nil {
-		fmt.Fprintln(os.Stderr, "error : some mistakes happend in parsing body")
-		return false, []SingleUserInfo{}
+		return false, "error : some mistakes happend in parsing body", []SingleUserInfo{}
 	}
 
-	// fmt.Println(string(body))
-	if resp.StatusCode == 200 {
+	if statusCode == http.StatusOK {
 		ret := make([]SingleUserInfo, len(temp.SingleUserInfoList))
 		for index, each := range temp.SingleUserInfoList {
 			ret[index].ID = each.ID
@@ -53,9 +47,7 @@ func ListRes(resp *http.Response) (bool, []SingleUserInfo) {
 			ret[index].Phone = each.Phone
 			ret[index].Email = each.Email
 		}
-		return false, ret
+		return true, temp.Message, ret
 	}
-
-	fmt.Fprintln(os.Stderr, temp.Message)
-	return false, []SingleUserInfo{}
+	return false, temp.Message, []SingleUserInfo{}
 }
