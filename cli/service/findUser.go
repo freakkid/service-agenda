@@ -14,7 +14,7 @@ func FindUser(id string) (bool, string, SingleUserInfo) {
 	if !ok {
 		return false, "Some mistakes happend in FindUser", SingleUserInfo{}
 	}
-	tarURL := URL + "/v1/users/?id=" + session + "&id=" + id
+	tarURL := URL + "/v1/users/" + id
 	req, err := http.NewRequest("GET", tarURL, strings.NewReader(""))
 
 	if err != nil {
