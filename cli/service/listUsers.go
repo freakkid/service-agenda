@@ -13,7 +13,7 @@ func ListAllUsers(limit string, offset string) (bool, string, []SingleUserInfo) 
 	// list all user via http request
 	ok, _, session := GetCurrentUser()
 	if !ok {
-		return false, "Some mistakes happend in ListAllUsers", []SingleUserInfo{}
+		return false, "No login user", []SingleUserInfo{}
 	}
 	req, err := http.NewRequest("GET", URL+"/v1/users?limit="+limit+"&offset="+offset, strings.NewReader(""))
 	if err != nil {

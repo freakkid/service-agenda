@@ -30,6 +30,7 @@ type FindUserRetJSON struct {
 	Email    string `json:"email"`
 }
 
+// User .
 type User struct {
 	ID       int    `json:"id"`
 	Username string `json:"username"`
@@ -75,8 +76,9 @@ type CreateUserResponse struct {
 	Phone    string
 }
 
-type MessageJson struct {
-	Message string
+//MessageJSON .
+type MessageJSON struct {
+	Message string `json:"message"`
 }
 
 func init() {

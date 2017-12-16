@@ -12,7 +12,7 @@ import (
 func FindUser(id string) (bool, string, SingleUserInfo) {
 	ok, _, session := GetCurrentUser()
 	if !ok {
-		return false, "Some mistakes happend in FindUser", SingleUserInfo{}
+		return false, "No login user", SingleUserInfo{}
 	}
 	tarURL := URL + "/v1/users/" + id
 	req, err := http.NewRequest("GET", tarURL, strings.NewReader(""))

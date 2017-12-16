@@ -2,50 +2,47 @@ package service
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
 )
 
-func DeleteUser(password string) (bool, error) {
+//DeleteUser .
+func DeleteUser(password string) (bool, string) {
 	ok, name, session := GetCurrentUser()
 	if !ok {
-		return false, errors.New("Some mistakes happend in FindUser")
+		return false, "No login user"
 	}
 	url := URL + "/v1/users/" + name + "?password=" + password
 	req, err := http.NewRequest("DELETE", url, nil)
 	req.Header.Set("Cookie", "key="+session)
 	if err != nil {
-		return false, errors.New("Can not construct DELETE request.")
+		return false, "Can not construct DELETE request."
 	}
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return false, errors.New("Send delete request failed.")
+		return false, "Send delete request failed."
 	}
 
 	defer res.Body.Close()
-	return DeleteRes(res)
+	return DeleteRes(res.Body, res.StatusCode)
 }
 
-func DeleteRes(res *http.Response) (bool, error) {
-	type RetJson struct {
-		Message string `json:"message"`
-	}
-	if res.StatusCode == 204 {
+//DeleteRes .
+func DeleteRes(resBody io.ReadCloser, statusCode int) (bool, string) {
+	if statusCode == 204 {
 		RemoveFile()
-		return true, nil
-	} else if res.StatusCode < 500 && res.StatusCode >= 400 {
-		body, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			return false, errors.New("Fail to read body.")
-		}
-		tmp := RetJson{}
-		if err := json.Unmarshal(body, &tmp); err != nil {
-			fmt.Fprintln(os.Stderr, "Can not resolve body.")
-		}
-		return false, errors.New(tmp.Message)
+		return true, "delete user successful"
 	}
-	return false, errors.New("Server failed.")
+	body, err := ioutil.ReadAll(resBody)
+	if err != nil {
+		return false, "Fail to read body."
+	}
+	tmp := MessageJSON{}
+	if err := json.Unmarshal(body, &tmp); err != nil {
+		fmt.Fprintln(os.Stderr, "Can not resolve body.")
+	}
+	return false, tmp.Message
 }
