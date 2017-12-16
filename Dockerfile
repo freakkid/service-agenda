@@ -9,7 +9,7 @@ WORKDIR /go/src/github.com/freakkid/service-agenda/cli
 RUN go-wrapper download && go build -o agenda && mv ./agenda /go/bin/
 
 WORKDIR /go/src/github.com/freakkid/service-agenda/service
-RUN go-wrapper download && go build -o agendad && mv ./agendad /go/bin/ && mv ../agenda.sh / && chmod +x ./agenda.sh
+RUN go-wrapper download && go build -o agendad && mv ./agendad /go/bin/ && mv ../agenda.sh / && chmod +x /agenda.sh
 
 WORKDIR /
 ENTRYPOINT [ "./agenda.sh" ]
