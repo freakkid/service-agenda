@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-if [ "$0" = "agendad" ] || [ $# = 0 ]
+if [ "$1" = "agendad" ]
 then
     exec agendad
 else
