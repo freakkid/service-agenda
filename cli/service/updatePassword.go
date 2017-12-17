@@ -33,7 +33,7 @@ func UpdateRes(resBody io.ReadCloser, statusCode int) (bool, string) {
 	if err != nil {
 		return false, "Fail to read body."
 	}
-	tmp := MessageJSON{}
+	tmp := SingleMessageResponse{}
 	if err := json.Unmarshal(body, &tmp); err != nil {
 		return false, "Can not resolve body."
 	}

@@ -34,13 +34,13 @@ func DeleteUser(password string) (bool, string) {
 func DeleteRes(resBody io.ReadCloser, statusCode int) (bool, string) {
 	if statusCode == 204 {
 		RemoveFile()
-		return true, "delete user successful"
+		return true, "delete user successfully"
 	}
 	body, err := ioutil.ReadAll(resBody)
 	if err != nil {
 		return false, "Fail to read body."
 	}
-	tmp := MessageJSON{}
+	tmp := SingleMessageResponse{}
 	if err := json.Unmarshal(body, &tmp); err != nil {
 		fmt.Fprintln(os.Stderr, "Can not resolve body.")
 	}

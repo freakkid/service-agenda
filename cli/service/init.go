@@ -50,7 +50,7 @@ type UserKeyResponse struct {
 
 // SingleMessageResponse -- DeleteUserByKeyAndPassword/ChangeUserPassword/GetUserKey
 type SingleMessageResponse struct {
-	Message string
+	Message string `json:"message"`
 }
 
 // SingleUserInfo .
@@ -76,14 +76,9 @@ type CreateUserResponse struct {
 	Phone    string
 }
 
-//MessageJSON .
-type MessageJSON struct {
-	Message string `json:"message"`
-}
-
 func init() {
-	UserFile = "../currentUser"
-	SessionFile = "../session"
+	UserFile = "./currentUser"
+	SessionFile = "./session"
 	// UserMap = "./userMap"
 	envURL := os.Getenv("SERVER_URL")
 	PORT := os.Getenv("PORT")
