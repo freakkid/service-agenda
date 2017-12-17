@@ -50,7 +50,7 @@ type UserKeyResponse struct {
 
 // SingleMessageResponse -- DeleteUserByKeyAndPassword/ChangeUserPassword/GetUserKey
 type SingleMessageResponse struct {
-	Message string
+	Message string `json:"message"`
 }
 
 // SingleUserInfo .
@@ -74,11 +74,6 @@ type CreateUserResponse struct {
 	UserName string
 	Email    string
 	Phone    string
-}
-
-//MessageJSON .
-type MessageJSON struct {
-	Message string `json:"message"`
 }
 
 func init() {

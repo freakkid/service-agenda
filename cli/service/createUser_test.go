@@ -8,14 +8,6 @@ import (
 	"testing"
 )
 
-// UserInfo .
-type UserInfo struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Email    string `json:"email"`
-	Phone    string `json:"phone"`
-}
-
 func checkErr(err error) {
 	if err != nil {
 		panic(err)
@@ -23,9 +15,17 @@ func checkErr(err error) {
 }
 func TestCreateRes(t *testing.T) {
 	// for test
-	b, err := json.Marshal(&UserInfo{Username: "hnx", Password: "123", Email: "email@qq.com", Phone: "12345678901"})
+	b, err := json.Marshal(&CreateUserResponse{Message: "create user successfully", ID: 1, UserName: "hnx", Email: "email@qq.com", Phone: "12345678901"})
 	checkErr(err)
 	p := ioutil.NopCloser(bytes.NewReader(b))
+
+	b1, err1 := json.Marshal(&CreateUserResponse{Message: "duplicate username", ID: -1, UserName: "", Email: "", Phone: ""})
+	checkErr(err1)
+	p1 := ioutil.NopCloser(bytes.NewReader(b1))
+
+	b2, err2 := json.Marshal(&CreateUserResponse{Message: "empty input", ID: -1, UserName: "", Email: "", Phone: ""})
+	checkErr(err2)
+	p2 := ioutil.NopCloser(bytes.NewReader(b2))
 
 	type args struct {
 		resBody    io.ReadCloser
@@ -39,10 +39,22 @@ func TestCreateRes(t *testing.T) {
 	}{
 		// for test
 		{
-			name:  "201",
+			name:  "CreateUserSuceed",
 			args:  args{resBody: p, statusCode: 201},
 			want:  true,
 			want1: "create user successfully",
+		},
+		{
+			name:  "DuplicateUsername",
+			args:  args{resBody: p1, statusCode: 400},
+			want:  false,
+			want1: "duplicate username",
+		},
+		{
+			name:  "EmptyInput",
+			args:  args{resBody: p2, statusCode: 400},
+			want:  false,
+			want1: "empty input",
 		},
 	}
 	for _, tt := range tests {

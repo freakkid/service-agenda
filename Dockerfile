@@ -6,17 +6,11 @@ ENV SERVER_ADDR=agendad
 ENV PORT=80
 
 WORKDIR /go/src/github.com/freakkid/service-agenda/cli
-RUN go-wrapper download
-RUN go build -o agenda
-RUN mv ./agenda /go/bin/
+RUN go-wrapper download && go build -o agenda && mv ./agenda /go/bin/
 
 WORKDIR /go/src/github.com/freakkid/service-agenda/service
-RUN go-wrapper download
-RUN go build -o agendad
-RUN mv ./agendad /go/bin/
-
-RUN mv ../agenda.sh /
+RUN go-wrapper download && go build -o agendad && mv ./agendad /go/bin/ && mv ../agenda.sh / && chmod +x /agenda.sh
 
 WORKDIR /
-ENTRYPOINT [ "agenda.sh" ]
+ENTRYPOINT [ "./agenda.sh" ]
 CMD [ "agendad" ]
