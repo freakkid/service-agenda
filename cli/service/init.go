@@ -80,7 +80,7 @@ func init() {
 	UserFile = "./currentUser"
 	SessionFile = "./session"
 	// UserMap = "./userMap"
-	envURL := os.Getenv("SERVER_URL")
+	envURL := os.Getenv("SERVER_ADDR")
 	PORT := os.Getenv("PORT")
 	if len(envURL) == 0 {
 		URL = "http://localhost:8080"
