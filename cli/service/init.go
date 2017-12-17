@@ -85,6 +85,6 @@ func init() {
 	if len(envURL) == 0 {
 		URL = "http://localhost:8080"
 	} else {
-		URL = envURL + ":" + PORT
+		URL = "http://" + envURL + ":" + PORT
 	}
 }
