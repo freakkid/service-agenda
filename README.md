@@ -5,6 +5,8 @@
 
 ## About the program
 
+    The program could register, login, show users information, delete user, update password.
+
 ## Docker
 
 ### Maintainer
@@ -200,7 +202,7 @@ TangXuanzhao xuanzhaotang@gmail.com
     * About generated files
         
         - server file:
-        
+
             + agenda.db stored users data will be placed in the same directory with main.go of server
 
         - client files:
