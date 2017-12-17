@@ -14,6 +14,7 @@ The program could register, login, show users information, delete user, update p
 TangXuanzhao xuanzhaotang@gmail.com
 
 ### Tips on using
+**Note, please use txzdream/agenda instead of agenda-go when pulling image.**
 
 1. 
     Create a server container with `docker run -d --name agendad agenda-golang`
