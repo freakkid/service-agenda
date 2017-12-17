@@ -85,31 +85,31 @@ func TestAgendaAtomicService_LoginAndGetSessionID(t *testing.T) {
 		a     *AgendaAtomicService
 		args  args
 		want1 int
-		want2 SingleMessageResponse
+		want2 LoginResponse
 	}{
 		{
 			name:  "login successfully",
 			args:  args{username: "hnx", password: "123"},
 			want1: 200,
-			want2: SingleMessageResponse{LoginSucceed},
+			want2: LoginResponse{LoginSucceed, 1},
 		},
 		{
 			name:  "empty input",
 			args:  args{username: "", password: ""},
 			want1: 400,
-			want2: SingleMessageResponse{EmptyUsernameOrPassword},
+			want2: LoginResponse{EmptyUsernameOrPassword, -1},
 		},
 		{
 			name:  "repeat login",
 			args:  args{username: "hnx", password: "123"},
 			want1: 200,
-			want2: SingleMessageResponse{LoginSucceed},
+			want2: LoginResponse{LoginSucceed, 1},
 		},
 		{
 			name:  "wrong input",
 			args:  args{username: "hnx", password: "1??23"},
 			want1: 401,
-			want2: SingleMessageResponse{IncorrectUsernameAndPassword},
+			want2: LoginResponse{IncorrectUsernameAndPassword, -1},
 		},
 	}
 	for _, tt := range tests {
