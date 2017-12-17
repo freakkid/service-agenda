@@ -4,6 +4,8 @@
 
 * Student ID: 15331117
 
+* Enail: threequarters@qq.com
+
 * [Commits History](https://github.com/freakkid/service-agenda/commits?author=freakkid)
 
 * Primarily responsible for:
@@ -12,13 +14,11 @@
 
     + [Write test file](https://github.com/freakkid/service-agenda/blob/master/service/entities/service_test.go) for service
 
-    + Write apiary.apib
+    + Write most of apiary.apib
 
-    + Add .travis.yml
+    + Add .travis.yml, LICENSE and take part in the USAGE writing of README.md
 
-    + Add LICENSE and take part in the USAGE writing of README.md
-
-    + take part in the testing of client and server code
+    + restructure the code of client and write some test files fot client
 
 * About my work
 

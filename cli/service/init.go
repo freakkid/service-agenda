@@ -77,8 +77,8 @@ type CreateUserResponse struct {
 }
 
 func init() {
-	UserFile = "../currentUser"
-	SessionFile = "../session"
+	UserFile = "./currentUser"
+	SessionFile = "./session"
 	// UserMap = "./userMap"
 	envURL := os.Getenv("SERVER_URL")
 	PORT := os.Getenv("PORT")
