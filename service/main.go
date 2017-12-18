@@ -18,7 +18,7 @@ func main() {
 		port = *pPort
 	} else {
 		tPort := os.Getenv("PORT")
-		if len(tport) != 0 {
+		if len(tPort) != 0 {
 			port = tPort
 		}
 	}
