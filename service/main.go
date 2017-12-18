@@ -11,15 +11,15 @@ import (
 const PORT string = "8080"
 
 func main() {
-	port := os.Getenv("PORT")
-	if len(port) != 0 {
-		PORT = port
-	}
-
 	pPort := flag.StringP("port", "p", PORT, "PORT for listening")
 	flag.Parse()
 	if len(*pPort) != 0 {
 		port = *pPort
+	} else {
+		tPort := os.Getenv("PORT")
+		if len(tport) != 0 {
+			port = tPort
+		}
 	}
 
 	serverInstance := server.NewServer()
