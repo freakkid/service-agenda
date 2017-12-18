@@ -29,3 +29,5 @@
     * And the api tools, **api blueprint** could not return different response and status code according to different request. I failed in all my attempts and I found an answer on stackoverflow said **api blueprint** cannot support this kind of operation. It may be a little unfriendly to client developer.
 
     * It takes me 50% time to design and modify the api document and make my code adapt to it. As for me, I learn some programming thought and "science popularization" about web from this course and learn coding about web development partly by myself. I get knowledge and joy on when coding. However, I could not get deep understanding of golang or other thing about web like some "dalao" of our class. :) I am so ashamed and uneasy every time I read his code and readme. (qaq)
+
+    * What's more, I think it will be better if every developer can express himselp clearly and logically and not shirk responsibility.
