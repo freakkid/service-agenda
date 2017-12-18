@@ -13,6 +13,7 @@ const PORT string = "8080"
 func main() {
 	pPort := flag.StringP("port", "p", PORT, "PORT for listening")
 	flag.Parse()
+	var port string
 	if len(*pPort) != 0 {
 		port = *pPort
 	} else {
