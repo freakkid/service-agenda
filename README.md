@@ -11,7 +11,7 @@ The program could register, login, show users information, delete user, update p
 
 ### Maintainer
 
-TangXuanzhao xuanzhaotang@gmail.com
+xxx xxx@gmail.com
 
 ### Tips on using
 **Note, please use txzdream/agenda instead of agenda-go when pulling image.**
