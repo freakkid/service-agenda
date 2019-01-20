@@ -1,10 +1,10 @@
 # Personal Work Summary Of Service-Agenda
 
-### Student Name: [黄楠绚](https://github.com/freakkid)
+### Student Name: [xxx](https://github.com/freakkid)
 
-* Student ID: 15331117
+* Student ID: xxx
 
-* Enail: threequarters@qq.com
+* Enail: xxx@qq.com
 
 * [Commits History](https://github.com/freakkid/service-agenda/commits?author=freakkid)
 
