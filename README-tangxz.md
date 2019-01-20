@@ -2,11 +2,11 @@
 ## [TXZdream](https://github.com/TXZdream)
 ### Basic message
 - Student ID
-15331288
+
 - Name
-唐玄昭
+
 - Email
-xuanzhaotang@gmail.com
+
 ### Task in this project
 - Implementation of some client function
 - A little debug
